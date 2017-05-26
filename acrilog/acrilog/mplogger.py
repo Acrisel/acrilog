@@ -30,7 +30,7 @@ from datetime import datetime
 import sys   
 
 class MpQueueListener(QueueListener):
-    def __init__(self, queue, *handlers, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=False):
+    def __init__(self, queue, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=False, *handlers):
         super(MpQueueListener, self).__init__(queue, *handlers)
         """ Initialize an instance with the specified queue and
         handlers.
@@ -170,8 +170,10 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     
     return handlers
 
+
 def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, formatter=None):
     result=list()
+    if logdir is None: logdir=''
     
     #key_s=''
     if process_key: name="%s.log" % process_key
@@ -231,14 +233,60 @@ class MpLogger(object):
         self.console=console
         self.name=name
         
-    def add_file_handlers(self, process_key=''):
-        #if pid in self.pids: return
-        #pid_s=''
-        #if pid: pid_s=".%s" % pid
+    def _add_file_handlers(self, process_key=''):
         if not process_key: process_key=self.name
         global_handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=process_key, formatter=self.record_formatter)
         for handler in global_handlers:
-            self.queue_listener.addHandler(handler)        
+            self.queue_listener.addHandler(handler)  
+            
+    @classmethod
+    def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, process_key='', ):
+        if not process_key: process_key=name
+        global_handlers=get_file_handlers(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter)
+        
+        
+        for handler in global_handlers:
+            logger.addHandler(handler)  
+            
+    def logger_info(self):
+        return { 'process_key': self.process_key,
+                'logdir': self.logdir, 
+                'logging_level': self.logging_level,
+                'record_formatter': self.record_formatter,
+                'record_formatter': self.record_formatter,
+                'loggerq': self.loggerq,
+               }
+            
+    @classmethod
+    def get_logger(cls, logger_info, name):
+        # create the logger to use.
+        logger = logging.getLogger(name)
+        # The only handler desired is the SubProcessLogHandler.  If any others
+        # exist, remove them. In this case, on Unix and Linux the StreamHandler
+        # will be inherited.
+    
+        #for handler in logger.handlers:
+        #    # just a check for my sanity
+        #    assert not isinstance(handler, TimedSizedRotatingHandler)
+        #    logger.removeHandler(handler)
+        
+        logging_level=logger_info['logging_level']
+        loggerq=logger_info['loggerq']
+        queue_handler = QueueHandler(loggerq)
+        logger.addHandler(queue_handler)
+
+        # add the handler
+        cls.add_file_handlers(name=name, process_key=logger_info['process_key'], 
+                              logger=logger,
+                              logdir=logger_info['logdir'], 
+                              logging_level=logging_level,
+                              record_formatter=logger_info['record_formatter'],)
+    
+        # On Windows, the level will not be inherited.  Also, we could just
+        # set the level to log everything here and filter it in the main
+        # process handlers.  For now, just set it from the global default.
+        logger.setLevel(logging_level)     
+        return logger
 
     def start(self, ):
         ''' starts logger for multiprocessing using queue.
@@ -258,11 +306,11 @@ class MpLogger(object):
         logger.setLevel(self.logging_level)
             
         manager=mp.Manager()    
-        q=manager.Queue()
-        queue_handler = QueueHandler(q)
+        self.loggerq=manager.Queue()
+        queue_handler = QueueHandler(self.loggerq)
         logger.addHandler(queue_handler)
         
-        self.queue_listener = MpQueueListener(q, name=self.name, logging_level=self.logging_level, logdir=self.logdir, formatter=self.record_formatter, process_key=self.process_key, force_global=self.force_global)
+        self.queue_listener = MpQueueListener(self.loggerq, name=self.name, logging_level=self.logging_level, logdir=self.logdir, formatter=self.record_formatter, process_key=self.process_key, force_global=self.force_global)
     
         if len(self.handlers) == 0:
             if self.console:
@@ -271,7 +319,7 @@ class MpLogger(object):
                     self.queue_listener.addConsoleHandler(handler)
             
             if self.logdir and self.force_global:
-                self.add_file_handlers(process_key=self.name)
+                self._add_file_handlers(process_key=self.name)
             
         else: # len(self.handlers) > 0:
             for handler in self.handlers:

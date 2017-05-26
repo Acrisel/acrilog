@@ -27,8 +27,11 @@ from acrilog import MpLogger
 import multiprocessing as mp
 import os
 
-def subproc(limit=1):
-    logger=logging.getLogger("acris.subproc")
+
+
+def procly(limit=1, logger_info=None):
+    logger=MpLogger.get_logger(logger_info, name="acrilog.procly", )
+    #logger=logging.getLogger("acrilog")
     for i in range(limit):
         sleep_time=3/random.randint(1,10)
         time.sleep(sleep_time)
@@ -44,26 +47,31 @@ logdir=os.getcwd()
 
 if __name__=='__main__':
     mp.freeze_support()
-    #mp.set_start_method('spawn')
+    mp.set_start_method('spawn')
     
-    mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
+    mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats,
+                      console=True, 
+                      datefmt='%Y-%m-%d,%H:%M:%S.%f')
     mplogger.start()
     
-    logger=logging.getLogger('acris')
+    logger=logging.getLogger('acrilog')
     
     logger.info("starting sub processes")
     procs=list()
     seq=0
     for limit in [1, 1]:
         seq+=1
-        proc=mp.Process(target=subproc, args=(limit, ))
+        proc=mp.Process(target=procly, args=(limit, mplogger.logger_info()))
         proc.name='subproc-%s' % seq
         procs.append(proc)
         proc.start()
-        
+    
+    
     for proc in procs:
         if proc:
+            #logger.info("joining proc %s" % repr(proc))
             proc.join()
+            #logger.info("joined proc %s" % repr(proc))
         
     logger.info("sub processes completed")
     

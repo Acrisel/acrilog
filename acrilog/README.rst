@@ -90,10 +90,9 @@ Within main process
         import os
         import multiprocessing as mp
 
-        logger=logging.getLogger(__name__)
-
-        def subproc(limit=1):
-            for i in range(limit):
+        def subproc(limit=1, logger_info=None):
+            logger=MpLogger.get_logger(logger_info, name="acrilog.subproc", )
+    		for i in range(limit):
                 sleep_time=3/random.randint(1,10)
                 time.sleep(sleep_time)
                 logger.info("proc [%s]: %s/%s - sleep %4.4ssec" % (os.getpid(), i, limit, sleep_time))
@@ -108,7 +107,7 @@ Within main process
         logger.debug("starting sub processes")
         procs=list()
         for limit in [1, 1]:
-            proc=mp.Process(target=subproc, args=(limit, ))
+            proc=mp.Process(target=subproc, args=(limit, mplogger.logger_info(),))
             procs.append(proc)
             proc.start()
     
@@ -144,7 +143,7 @@ Example output
 Change History
 ==============
 
-    N/A
+    0.9: add ability to pass logger_info to subprocess
         
 Next Steps
 ==========
