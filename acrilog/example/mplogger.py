@@ -28,7 +28,6 @@ import multiprocessing as mp
 import os
 
 
-
 def procly(limit=1, logger_info=None):
     logger=MpLogger.get_logger(logger_info, name="acrilog.procly", )
     #logger=logging.getLogger("acrilog")
