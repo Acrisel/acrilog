@@ -28,7 +28,7 @@ import multiprocessing as mp
 import os
 
 def subproc(limit=1):
-    logger=logging.getLogger("acris.subproc")
+    logger=logging.getLogger("acrilog")
     for i in range(limit):
         sleep_time=3/random.randint(1,10)
         time.sleep(sleep_time)
@@ -49,7 +49,7 @@ if __name__=='__main__':
     mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
     mplogger.start()
     
-    logger=logging.getLogger('acris')
+    logger=logging.getLogger('acrilog')
     
     logger.info("starting sub processes")
     procs=list()

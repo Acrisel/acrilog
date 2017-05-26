@@ -30,7 +30,7 @@ from datetime import datetime
 import sys   
 
 class MpQueueListener(QueueListener):
-    def __init__(self, queue, *handlers, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=False):
+    def __init__(self, queue, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=False, *handlers):
         super(MpQueueListener, self).__init__(queue, *handlers)
         """ Initialize an instance with the specified queue and
         handlers.
