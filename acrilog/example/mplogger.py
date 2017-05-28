@@ -48,19 +48,25 @@ if __name__=='__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')
     
-    mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats,
-                      console=True, 
+    mplogger=MpLogger(name='acrilog', 
+                      logdir='/var/acrisel/log/acrilog', 
+                      logging_level=logging.DEBUG, 
+                      level_formats=level_formats,
+                      console=False, 
+                      force_global=False,
                       datefmt='%Y-%m-%d,%H:%M:%S.%f')
-    mplogger.start()
+    logger=mplogger.start()
     
-    logger=logging.getLogger('acrilog')
+    #logger=logging.getLogger('acrilog')
+    logger_info=mplogger.logger_info()
+    #logger=MpLogger.get_logger(name='acrilog', logger_info=logger_info)
     
     logger.info("starting sub processes")
     procs=list()
     seq=0
     for limit in [1, 1]:
         seq+=1
-        proc=mp.Process(target=procly, args=(limit, mplogger.logger_info()))
+        proc=mp.Process(target=procly, args=(limit, logger_info))
         proc.name='subproc-%s' % seq
         procs.append(proc)
         proc.start()

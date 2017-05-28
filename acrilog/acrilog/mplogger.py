@@ -30,7 +30,7 @@ from datetime import datetime
 import sys   
 
 class MpQueueListener(QueueListener):
-    def __init__(self, queue, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=False, *handlers):
+    def __init__(self, queue, name='mplogger', logging_level=logging.INFO, logdir=None, formatter=None, process_key=[], force_global=True, *handlers):
         super(MpQueueListener, self).__init__(queue, *handlers)
         """ Initialize an instance with the specified queue and
         handlers.
@@ -67,8 +67,11 @@ class MpQueueListener(QueueListener):
         
         # Find handlers that match process keys
         handlers=list()
+        
         for process_key in self.process_key:
             record_key=record.__dict__.get(process_key, None)
+            #print('record_key', record_key)
+            #print('process_key', process_key)
             if record_key: 
                 process_handlers=self.key_handlers[process_key]
                 key_handlers=process_handlers.get(record_key, None)
@@ -85,6 +88,7 @@ class MpQueueListener(QueueListener):
             handlers.extend(self.console_handlers)
         
         record = self.prepare(record)
+        
         for handler in list(set(handlers)):
             if record.levelno >= handler.level: # This check is not in the parent class
                 handler.handle(record)
@@ -220,6 +224,12 @@ class MpLogger(object):
         '''
         
         self.logdir=logdir
+        if not os.path.isdir(logdir):
+            try:
+                os.makedirs(logdir, mode=0o744, exist_ok=True)
+            except:
+                raise
+            
         self.logging_level=logging_level
         self.level_formats=level_formats
         self.datefmt=datefmt
@@ -235,8 +245,8 @@ class MpLogger(object):
         
     def _add_file_handlers(self, process_key=''):
         if not process_key: process_key=self.name
-        global_handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=process_key, formatter=self.record_formatter)
-        for handler in global_handlers:
+        handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=process_key, formatter=self.record_formatter)
+        for handler in handlers:
             self.queue_listener.addHandler(handler)  
             
     @classmethod
@@ -291,9 +301,9 @@ class MpLogger(object):
     def start(self, ):
         ''' starts logger for multiprocessing using queue.
         
-        logdir: if provided, error and debug logs will be created in it.
-        logging_level: logging level from which to report
-        logger_format: formating per logging level
+        Returns:
+        
+            logger: set with correct Q handler
         '''
         # create console handler and set level to info
         
@@ -318,7 +328,7 @@ class MpLogger(object):
                 for handler in handlers:
                     self.queue_listener.addConsoleHandler(handler)
             
-            if self.logdir and self.force_global:
+            if self.logdir: # and self.force_global:
                 self._add_file_handlers(process_key=self.name)
             
         else: # len(self.handlers) > 0:
@@ -326,6 +336,7 @@ class MpLogger(object):
                 self.queue_listener.addHandler(handler)
             
         self.queue_listener.start()
+        return logging.getLogger(name=self.name)
         
     def stop(self,):
         if self.queue_listener:

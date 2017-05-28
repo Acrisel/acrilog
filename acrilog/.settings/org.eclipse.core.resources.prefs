@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
 encoding//acrilog/mplogger.py=utf-8
+encoding//acrilog/timed_sized_logging_handler.py=utf-8
 encoding//example/mplogger.py=utf-8
 encoding//example/timed_sized_log_handler.py=utf-8

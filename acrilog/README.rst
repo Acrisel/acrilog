@@ -102,7 +102,7 @@ Within main process
                         }
     
         mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
-        mplogger.start()
+        logger=mplogger.start()
 
         logger.debug("starting sub processes")
         procs=list()
@@ -119,15 +119,6 @@ Within main process
 
         mplogger.stop()	
         
-Within individual process
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    .. code-block:: python
-	
-        import logging
-	
-        logger=logging.getLogger(__name__)
-        logger.debug("logging from sub process")
     
 Example output
 --------------
