@@ -24,7 +24,7 @@ from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 
 class TimedSizedRotatingHandler(TimedRotatingFileHandler, RotatingFileHandler):
     
-    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False, when='h', interval=1, utc=False, atTime=None):
+    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding='ascii', delay=False, when='h', interval=1, utc=False, atTime=None):
         """ 
         Combines RotatingFileHandler TimedRotatingFileHandler)  
         """

@@ -133,6 +133,7 @@ class MicrosecondsDatetimeFormatter(logging.Formatter):
         if datefmt is not None:
             s = ct.strftime(datefmt)
         else:
+            #print('MicrosecondsDatetimeFormatter:', repr(ct),)
             t = ct.strftime("%Y-%m-%d %H:%M:%S")
             s = "%s.%03d" % (t, record.msecs)
             
@@ -175,7 +176,7 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     return handlers
 
 
-def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, formatter=None):
+def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, encoding=None):
     result=list()
     if logdir is None: logdir=''
     
@@ -184,7 +185,7 @@ def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, f
     else: name='mplogger.log'
     
     #name="error%s.log" % key_s
-    handler = TimedSizedRotatingHandler(filename=os.path.join(logdir, name), encoding=None, delay="true")
+    handler = TimedSizedRotatingHandler(filename=os.path.join(logdir, name), encoding=encoding, delay="true")
     handler.setLevel(logging_level)
     handler.setFormatter(formatter)
     result.append(handler)
@@ -208,7 +209,7 @@ def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, f
 class MpLogger(object):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=[], console=True, force_global=False, logging_root=None, handlers=[]):
+    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=[], console=True, force_global=False, logging_root=None, encoding='ascii', handlers=[]):
         '''Initiates MpLogger service
         
         Args:
@@ -220,6 +221,7 @@ class MpLogger(object):
             process_key: list of record names that would be used to create files
             force_global: when set, records assigned to process_key handler will also routed to global handlers.
             logging_root: ???
+            encoding: used in defining file handlers; default 'ascii'
             handlers: list of global handlers 
         '''
         
@@ -242,17 +244,18 @@ class MpLogger(object):
         self.force_global=force_global
         self.console=console
         self.name=name
+        self.encoding=encoding
         
     def _add_file_handlers(self, process_key=''):
         if not process_key: process_key=self.name
-        handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=process_key, formatter=self.record_formatter)
+        handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=process_key, formatter=self.record_formatter, encoding=self.encoding)
         for handler in handlers:
             self.queue_listener.addHandler(handler)  
             
     @classmethod
-    def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, process_key='', ):
+    def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, process_key='', encoding='ascii'):
         if not process_key: process_key=name
-        global_handlers=get_file_handlers(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter)
+        global_handlers=get_file_handlers(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter, encoding=encoding)
         
         
         for handler in global_handlers:

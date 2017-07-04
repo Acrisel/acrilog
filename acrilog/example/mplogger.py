@@ -52,9 +52,11 @@ if __name__=='__main__':
                       logdir='/var/acrisel/log/acrilog', 
                       logging_level=logging.DEBUG, 
                       level_formats=level_formats,
-                      console=False, 
+                      console=True, 
                       force_global=False,
-                      datefmt='%Y-%m-%d,%H:%M:%S.%f')
+                      datefmt='%Y-%m-%d,%H:%M:%S.%f',
+                      encoding='utf8',
+                      )
     logger=mplogger.start()
     
     #logger=logging.getLogger('acrilog')
@@ -78,7 +80,7 @@ if __name__=='__main__':
             proc.join()
             #logger.info("joined proc %s" % repr(proc))
         
-    logger.info("sub processes completed")
+    logger.info("sub processes completed; \u2754")
     
     mplogger.stop()
 

@@ -134,7 +134,8 @@ Example output
 Change History
 ==============
 
-    0.9: add ability to pass logger_info to subprocess
+    0.9: added ability to pass logger_info to subprocess,
+         exposed encoding parameter,
         
 Next Steps
 ==========
