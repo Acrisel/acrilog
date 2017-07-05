@@ -246,7 +246,7 @@ class MpLogger(object):
             datefmt: date format to use
             process_key: list of record names that would be used to create files
             console_name: when set, records assigned to process_key handler will also routed to global handlers.
-            logging_root: ???
+            logging_root: defaults to name if not provided
             encoding: used in defining file handlers; default 'ascii'
             handlers: list of global handlers 
             kwargs: pass-through to handler defining its policy
@@ -273,7 +273,7 @@ class MpLogger(object):
         self.level_formats=level_formats
         self.datefmt=datefmt
         self.record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
-        self.logging_root=logging_root
+        self.logging_root=logging_root if logging_root is not None else name
         self.logger_initialized=False
         self.queue_listener=None
         self.handlers=handlers

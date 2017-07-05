@@ -53,11 +53,11 @@ if __name__=='__main__':
                       logging_level=logging.DEBUG, 
                       level_formats=level_formats,
                       console=True, 
-                      consolidate=False,
+                      consolidate=True,
                       datefmt='%Y-%m-%d,%H:%M:%S.%f',
                       encoding='utf8',
                       file_mode='w',
-                      process_key=['processName'], 
+                      # process_key=['processName'], 
                       )
     logger=mplogger.start() #'acrilog_main')
     
