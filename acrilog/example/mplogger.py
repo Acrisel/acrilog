@@ -29,7 +29,7 @@ import os
 
 
 def procly(limit=1, logger_info=None):
-    logger=MpLogger.get_logger(logger_info, name="acrilog.procly", )
+    logger=MpLogger.get_logger(logger_info, name="acrilog.procly.%s" % limit, )
     #logger=logging.getLogger("acrilog")
     for i in range(limit):
         sleep_time=3/random.randint(1,10)
@@ -53,11 +53,13 @@ if __name__=='__main__':
                       logging_level=logging.DEBUG, 
                       level_formats=level_formats,
                       console=True, 
-                      force_global=False,
+                      consolidate=False,
                       datefmt='%Y-%m-%d,%H:%M:%S.%f',
                       encoding='utf8',
+                      file_mode='w',
+                      process_key=['processName'], 
                       )
-    logger=mplogger.start()
+    logger=mplogger.start() #'acrilog_main')
     
     #logger=logging.getLogger('acrilog')
     logger_info=mplogger.logger_info()
@@ -66,9 +68,9 @@ if __name__=='__main__':
     logger.info("starting sub processes")
     procs=list()
     seq=0
-    for limit in [1, 1]:
+    for limit in range(3):
         seq+=1
-        proc=mp.Process(target=procly, args=(limit, logger_info))
+        proc=mp.Process(target=procly, args=(limit+1, logger_info))
         proc.name='subproc-%s' % seq
         procs.append(proc)
         proc.start()
@@ -76,9 +78,7 @@ if __name__=='__main__':
     
     for proc in procs:
         if proc:
-            #logger.info("joining proc %s" % repr(proc))
             proc.join()
-            #logger.info("joined proc %s" % repr(proc))
         
     logger.info("sub processes completed; \u2754")
     

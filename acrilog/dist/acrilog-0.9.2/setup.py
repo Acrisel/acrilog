@@ -21,7 +21,7 @@ To create package and upload:
 
   python setup.py register
   python setup.py sdist
-  twine upload -s dist/acrilog-1.0.2.tar.gz
+  python setup.py sdist upload
 
 '''
 PACKAGE = "acrilog"

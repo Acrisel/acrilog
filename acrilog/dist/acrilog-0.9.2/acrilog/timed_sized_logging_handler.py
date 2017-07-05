@@ -21,21 +21,16 @@
 ##############################################################################
 
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
-import os
 
 class TimedSizedRotatingHandler(TimedRotatingFileHandler, RotatingFileHandler):
     
-    def __init__(self, filename, file_mode='a', maxBytes=0, backupCount=0, encoding='ascii', delay=False, when='h', interval=1, utc=False, atTime=None):
+    def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding='ascii', delay=False, when='h', interval=1, utc=False, atTime=None):
         """ 
         Combines RotatingFileHandler TimedRotatingFileHandler)  
         """
-        
-        if file_mode.startswith('w'):
-            try: os.remove(filename)
-            except: pass
-        RotatingFileHandler.__init__(self, filename=filename, mode=file_mode, maxBytes=maxBytes, backupCount=backupCount, encoding=encoding, delay=delay)
+        RotatingFileHandler.__init__(self, filename=filename, mode=mode, maxBytes=maxBytes, backupCount=backupCount, encoding=encoding, delay=delay)
         TimedRotatingFileHandler.__init__(self, filename=filename, when=when, interval=interval, backupCount=backupCount, encoding=encoding, delay=delay, utc=utc, atTime=atTime)
-        
+
     def shouldRollover(self, record):
         """
         Check the need to rotate.     

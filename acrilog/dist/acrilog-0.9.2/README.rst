@@ -102,7 +102,7 @@ Within main process
                         }
     
         mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
-        logger=mplogger.start(name='main_process')
+        logger=mplogger.start()
 
         logger.debug("starting sub processes")
         procs=list()
@@ -129,58 +129,13 @@ Example output
         [ 2016-12-19,11:39:45.258794 ][ INFO ][ proc [932]: 0/1 - sleep  0.3sec ]
         [ 2016-12-19,11:39:45.707914 ][ INFO ][ proc [931]: 0/1 - sleep 0.75sec ]
         [ 2016-12-19,11:39:45.710487 ][ DEBUG ][ sub processes completed ][ mplogger.<module>(56) ]
-        
-Clarification of parameters
-===========================
-
-name
-----
-
-**name** identifies the base name for logger. Note the this parameter is available in both MpLogger init method and in its start method.
-
-MpLogger init's **name** argument is used for consolidated logger when **consolidate** is set.  It is also used for private logger of the main process, if one not provided when calling *start()* method. 
-
-proecess_key
-------------
-
-**process_key** defines one or more logger record field that would be part of the file name of the log.  In case it is used, logger will have a file per records' process key.  This will be in addition for a consolidated log, if **consolidate** is set. 
-
-By default, MpLogger uses **name** as the process key.  If something else is provided, e.g., **processName**, it will be concatenated to **name** as postfix.  
-
-file_mode
----------
-
-**file_mode** let program define how logs will be opened.  In default, logs are open in append mode.  Hense, history is collected and file a rolled overnight and by size. 
-
-consolidate
------------ 
-
-**consolidate**, when set, will create consolidated log from all processing logs.
-If **consolidated** is set and *start()* is called without **name**, consolidation will be done into the main process.
-
-kwargs
-------
-
-**kwargs** are named arguments that will passed to FileHandler.  This include:
-    | file_mode='a', for RotatingFileHandler
-    | maxBytes=0, for RotatingFileHandler
-    | backupCount=0, for RotatingFileHandler and TimedRotatingFileHandler
-    | encoding='ascii', for RotatingFileHandler and TimedRotatingFileHandler
-    | delay=False, for TimedRotatingFileHandler
-    | when='h', for TimedRotatingFileHandler
-    | interval=1, TimedRotatingFileHandler
-    | utc=False, TimedRotatingFileHandler
-    | atTime=None, for TimedRotatingFileHandler
-    
+     
      
 Change History
 ==============
 
     0.9: added ability to pass logger_info to subprocess,
          exposed encoding parameter,
-    1.0: replaced **force_global** with **consolidate** to genrerate consolidated log
-         add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
-         MpLogger.__init__() **name** argument will be used for consolidated log.
         
 Next Steps
 ==========
