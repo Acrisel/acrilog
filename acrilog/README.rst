@@ -19,6 +19,8 @@ Overview
     It included:
         1. Time and size rotating handler.
         #. Multiprocessing logging queue server
+        
+    The library makes it easier to add logging in a multiprocessing environment where processes are split among multiple Python source codes.  
     
     We decided to contribute this library to Python community as a token of appreciation to
     what this community enables us.
