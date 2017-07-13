@@ -84,9 +84,12 @@ class MpQueueListener(QueueListener):
                 need_handler=len(key_handlers) ==0 and (record_key != self.name or len(self.global_handlers) ==0)
                 if need_handler:
                     name=record_name
+                    #file_prefix=self.kwargs.get('file_prefix')
+                    #if file_prefix is None: file_prefix=name
+                    #print('file_prefix, record_key, record_name:', file_prefix, record_key, record_name)
                     if record_name != record_key:
                         name="%s.%s" % (name, record_key)
-                    key_handlers=get_file_handlers(logging_level=self.logging_level, logdir=self.logdir, process_key=name, formatter=self.formatter, **self.kwargs)
+                    key_handlers=get_file_handler(logging_level=self.logging_level, logdir=self.logdir, process_key=name, formatter=self.formatter, **self.kwargs)
                     process_handlers[record_key]=key_handlers
                 handlers.extend(key_handlers)
                 
@@ -186,7 +189,7 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     return handlers
 
 
-def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, **kwargs):
+def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
     '''
     
     Args:
@@ -205,10 +208,13 @@ def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, f
     if logdir is None: logdir=''
     
     #key_s=''
+    if file_suffix: process_key="%s.%s" %(process_key, file_suffix)
     if process_key: name="%s.log" % process_key
     else: name='mplogger.log'
+    if file_prefix: name="%s.%s" %(file_prefix, name)
     
-    #print('get_file_handlers: name:', name)
+    
+    #print('get_file_handlers: process_key:', process_key)
     #traceback.print_stack()
     filename=os.path.join(logdir, name)
     handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
@@ -216,26 +222,14 @@ def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, f
     handler.setFormatter(formatter)
     result.append(handler)
     # create error file handler and set level to error
-    '''
-    name="error%s.log" % key_s
-    handler = TimedSizedRotatingHandler(filename=os.path.join(logdir, name), encoding=None, delay="true")
-    handler.setLevel(logging.ERROR)
-    handler.setFormatter(formatter)
-    result.append(handler)
-
-    # create debug file handler and set level to debug
-    name="debug%s.log" % key_s
-    handler = TimedSizedRotatingHandler(filename=os.path.join(logdir, name), )
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-    result.append(handler)
-    '''
+    
     return result
 
 class MpLogger(object):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, logging_root=None, handlers=[], **kwargs):
+    #def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, logging_root=None, handlers=[], **kwargs):
+    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, handlers=[], **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -246,11 +240,13 @@ class MpLogger(object):
             datefmt: date format to use
             process_key: list of record names that would be used to create files
             console_name: when set, records assigned to process_key handler will also routed to global handlers.
-            logging_root: defaults to name if not provided
+            #logging_root: defaults to name if not provided
             encoding: used in defining file handlers; default 'ascii'
             handlers: list of global handlers 
             kwargs: pass-through to handler defining its policy
                 file_mode='a', 
+                file_prefix='',
+                file_suffix='',
                 maxBytes=0, 
                 backupCount=0, 
                 encoding='ascii', 
@@ -273,7 +269,7 @@ class MpLogger(object):
         self.level_formats=level_formats
         self.datefmt=datefmt
         self.record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
-        self.logging_root=logging_root if logging_root is not None else name
+        #self.logging_root=logging_root if logging_root is not None else name
         self.logger_initialized=False
         self.queue_listener=None
         self.handlers=handlers
@@ -288,7 +284,8 @@ class MpLogger(object):
         
     def _global_file_handlers(self,):
         #if not process_key: process_key=self.name
-        handlers=get_file_handlers(logdir=self.logdir, logging_level=self.logging_level, process_key=self.name, formatter=self.record_formatter, **self.kwargs)
+        handlers=get_file_handler(logdir=self.logdir, logging_level=self.logging_level, process_key=self.name, formatter=self.record_formatter, **self.kwargs)
+        self.global_filename=handlers[0].filename
         return handlers
         #for handler in handlers:
         #    self.queue_listener.addHandler(handler)  
@@ -309,7 +306,7 @@ class MpLogger(object):
                 atTime=None
         '''
         if not process_key: process_key=name
-        global_handlers=get_file_handlers(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter, **kwargs)
+        global_handlers=get_file_handler(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter, **kwargs)
         
         for handler in global_handlers:
             logger.addHandler(handler)  
@@ -381,7 +378,8 @@ class MpLogger(object):
             return
         
         self.logger_initialized=True
-        logger = logging.getLogger(name=self.logging_root)
+        #logger = logging.getLogger(name=self.logging_root)
+        logger = logging.getLogger(name=self.name)
         logger.setLevel(self.logging_level)
             
         manager=mp.Manager()    

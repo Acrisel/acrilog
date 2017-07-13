@@ -33,6 +33,7 @@ class TimedSizedRotatingHandler(TimedRotatingFileHandler, RotatingFileHandler):
         if file_mode.startswith('w'):
             try: os.remove(filename)
             except: pass
+        self.filename=filename
         RotatingFileHandler.__init__(self, filename=filename, mode=file_mode, maxBytes=maxBytes, backupCount=backupCount, encoding=encoding, delay=delay)
         TimedRotatingFileHandler.__init__(self, filename=filename, when=when, interval=interval, backupCount=backupCount, encoding=encoding, delay=delay, utc=utc, atTime=atTime)
         

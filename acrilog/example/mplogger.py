@@ -58,6 +58,8 @@ if __name__=='__main__':
                       datefmt='%Y-%m-%d,%H:%M:%S.%f',
                       encoding='utf8',
                       file_mode='w',
+                      #file_prefix='acrilog_%s' % os.getpid(),
+                      file_suffix='%s' % os.getpid(),
                       # process_key=['processName'], 
                       )
     logger=mplogger.start() #'acrilog_main')

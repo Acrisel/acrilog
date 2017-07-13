@@ -149,6 +149,11 @@ proecess_key
 
 By default, MpLogger uses **name** as the process key.  If something else is provided, e.g., **processName**, it will be concatenated to **name** as postfix.  
 
+file_prefix and file_suffix
+---------------------------
+
+Allows to distinguish among sets of logs of different runs by setting one (or both) of **file_prefix** and **file_suffix**.  Usually, the use of PID and granular datetime as prefix or suffix would create unique set of logs.
+
 file_mode
 ---------
 
@@ -183,6 +188,7 @@ Change History
     1.0: replaced **force_global** with **consolidate** to genrerate consolidated log
          add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
          MpLogger.__init__() **name** argument will be used for consolidated log.
+    1.1: add **file_prefix** and **file_suffix** as MpLogger parameters. 
         
 Next Steps
 ==========
