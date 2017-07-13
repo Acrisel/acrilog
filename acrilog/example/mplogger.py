@@ -31,6 +31,7 @@ import os
 def procly(limit=1, logger_info=None):
     logger=MpLogger.get_logger(logger_info, name="acrilog.procly.%s" % limit, )
     #logger=logging.getLogger("acrilog")
+    logger.setLevel(logging.DEBUG)
     for i in range(limit):
         sleep_time=3/random.randint(1,10)
         time.sleep(sleep_time)
@@ -50,7 +51,7 @@ if __name__=='__main__':
     
     mplogger=MpLogger(name='acrilog', 
                       logdir='/var/acrisel/log/acrilog', 
-                      logging_level=logging.DEBUG, 
+                      logging_level=logging.INFO, 
                       level_formats=level_formats,
                       console=True, 
                       consolidate=True,
@@ -80,6 +81,7 @@ if __name__=='__main__':
         if proc:
             proc.join()
         
+    logger.debug("sub processes completed;")
     logger.info("sub processes completed; \u2754")
     
     mplogger.stop()

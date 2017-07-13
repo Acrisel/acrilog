@@ -176,7 +176,7 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     handlers=list()
     
     stdout_handler = logging.StreamHandler(stream=sys.stdout)
-    stdout_handler.setLevel(logging_level)
+    #stdout_handler.setLevel(logging_level)
     formatter = LevelBasedFormatter(level_formats=level_formats,datefmt=datefmt) 
     stdout_handler.setFormatter(formatter)
     handlers.append(stdout_handler)
@@ -212,7 +212,7 @@ def get_file_handlers(logdir='', logging_level=logging.INFO, process_key=None, f
     #traceback.print_stack()
     filename=os.path.join(logdir, name)
     handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
-    handler.setLevel(logging_level)
+    #handler.setLevel(logging_level)
     handler.setFormatter(formatter)
     result.append(handler)
     # create error file handler and set level to error
