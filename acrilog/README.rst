@@ -188,7 +188,9 @@ Change History
     1.0: replaced **force_global** with **consolidate** to genrerate consolidated log
          add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
          MpLogger.__init__() **name** argument will be used for consolidated log.
-    1.1: add **file_prefix** and **file_suffix** as MpLogger parameters. 
+    1.1: add **file_prefix** and **file_suffix** as MpLogger parameters.
+         fix bug when logdir is Nonw 
+    
         
 Next Steps
 ==========

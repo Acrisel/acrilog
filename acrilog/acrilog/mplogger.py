@@ -22,19 +22,13 @@
 
 import logging
 from logging.handlers import QueueListener, QueueHandler
-import os
 import multiprocessing as mp
-from copy import copy
-from acrilog.timed_sized_logging_handler import TimedSizedRotatingHandler
-from datetime import datetime
-import sys   
-import socket
-import traceback
+from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
 
 
-class MpQueueListener(QueueListener):
+class LogRecordQueueListener(QueueListener):
     def __init__(self, queue, name=None, logging_level=logging.INFO, logdir=None, formatter=None, process_key=['processName'], global_handlers=[], **kwargs):
-        super(MpQueueListener, self).__init__(queue, *global_handlers)
+        super(LogRecordQueueListener, self).__init__(queue, *global_handlers)
         """ Initialize an instance with the specified queue and
         handlers.
         
@@ -45,18 +39,18 @@ class MpQueueListener(QueueListener):
                 if record doens't have any matching key, global handlers will be used.
                 if records match, only matching handlers will be used. 
         """
-        self.process_key=process_key
-        self.logdir=logdir
-        self.formatter=formatter
-        self.name=name
-        self.kwargs=kwargs
+        self.process_key = process_key
+        self.logdir = logdir
+        self.formatter = formatter
+        self.name = name
+        self.logging_level = logging_level
+        self.kwargs = kwargs
         
         key_handlers=dict([(p, dict()) for p in process_key])
                     
-        self.key_handlers=key_handlers
-        self.global_handlers=global_handlers
-        self.console_handlers=list()
-        self.logging_level=logging_level
+        self.key_handlers = key_handlers
+        self.global_handlers = global_handlers
+        self.console_handlers = list()
         
     def handle(self, record):
         """ Override handle a record.
@@ -69,28 +63,28 @@ class MpQueueListener(QueueListener):
         """
         
         # Find handlers that match process keys
-        handlers=list()
-        record_name=record.__dict__.get('name', None)
+        handlers = list()
+        record_name = record.__dict__.get('name', None)
         for process_key in self.process_key:
-            record_key=record.__dict__.get(process_key, None)
+            record_key = record.__dict__.get(process_key, None)
             #print('record_key[process_key]: %s[%s]' %(record_key, process_key))
             #print('record_key[processName]: %s' %(repr(record.__dict__)))
             if record_key: 
-                process_handlers=self.key_handlers[process_key]
-                key_handlers=process_handlers.get(record_key, [])
+                process_handlers = self.key_handlers[process_key]
+                key_handlers = process_handlers.get(record_key, [])
                 
                 # avoid getting dedicated handler in special case when in consolidated mode and record with 
                 # name equal to the global one (QueueListiner name)
-                need_handler=len(key_handlers) ==0 and (record_key != self.name or len(self.global_handlers) ==0)
+                need_handler = len(key_handlers) ==0 and (record_key != self.name or len(self.global_handlers) ==0)
                 if need_handler:
-                    name=record_name
+                    name = record_name
                     #file_prefix=self.kwargs.get('file_prefix')
                     #if file_prefix is None: file_prefix=name
                     #print('file_prefix, record_key, record_name:', file_prefix, record_key, record_name)
                     if record_name != record_key:
-                        name="%s.%s" % (name, record_key)
-                    key_handlers=get_file_handler(logging_level=self.logging_level, logdir=self.logdir, process_key=name, formatter=self.formatter, **self.kwargs)
-                    process_handlers[record_key]=key_handlers
+                        name = "%s.%s" % (name, record_key)
+                    key_handlers = get_file_handler(logging_level=self.logging_level, logdir=self.logdir, process_key=name, formatter=self.formatter, **self.kwargs)
+                    process_handlers[record_key] = key_handlers
                 handlers.extend(key_handlers)
                 
         
@@ -136,99 +130,10 @@ class MpQueueListener(QueueListener):
             hdlr.close()
             self.handlers.remove(hdlr)
             
-class MicrosecondsDatetimeFormatter(logging.Formatter):
-    def formatTime(self, record, datefmt=None):
-        ct = datetime.fromtimestamp(record.created)
-        
-        if ct is  None:
-            ct=datetime.now()
-            
-        if datefmt is not None:
-            s = ct.strftime(datefmt)
-        else:
-            #print('MicrosecondsDatetimeFormatter:', repr(ct),)
-            t = ct.strftime("%Y-%m-%d %H:%M:%S")
-            s = "%s.%03d" % (t, record.msecs)
-            
-        return s
-            
-class LevelBasedFormatter(logging.Formatter):
-    
-    defaults={
-        logging.DEBUG : u"%(asctime)-15s: %(process)-7s: %(levelname)-7s: %(message)s: %(module)s.%(funcName)s(%(lineno)d)",
-        'default' : u"%(asctime)-15s: %(process)-7s: %(levelname)-7s: %(message)s",
-        }
- 
-    def __init__(self, level_formats={}, datefmt=None):
-        defaults=LevelBasedFormatter.defaults
-        if level_formats:
-            defaults=copy(LevelBasedFormatter.defaults)
-            defaults.update(level_formats)
-            
-        self.datefmt=datefmt  
-        self.defaults=dict([(level, MicrosecondsDatetimeFormatter(fmt=fmt, datefmt=self.datefmt)) for level, fmt in defaults.items()])
-        self.default_format=self.defaults['default']  
-        logging.Formatter.__init__(self, fmt=self.default_format, datefmt=self.datefmt)
 
-    def format(self, record):
-        formatter=self.defaults.get(record.levelno, self.default_format,)
-        result = formatter.format(record)
-        return result
-    
-def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=None):
-    handlers=list()
-    
-    stdout_handler = logging.StreamHandler(stream=sys.stdout)
-    #stdout_handler.setLevel(logging_level)
-    formatter = LevelBasedFormatter(level_formats=level_formats,datefmt=datefmt) 
-    stdout_handler.setFormatter(formatter)
-    handlers.append(stdout_handler)
-    
-    stderr_handler = logging.StreamHandler(stream=sys.stderr)
-    
-    return handlers
-
-
-def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
-    '''
-    
-    Args:
-        kwargs:
-            file_mode='a', 
-            maxBytes=0, 
-            backupCount=0, 
-            encoding='ascii', 
-            delay=False, 
-            when='h', 
-            interval=1, 
-            utc=False, 
-            atTime=None
-    '''
-    result=list()
-    if logdir is None: logdir=''
-    
-    #key_s=''
-    if file_suffix: process_key="%s.%s" %(process_key, file_suffix)
-    if process_key: name="%s.log" % process_key
-    else: name='mplogger.log'
-    if file_prefix: name="%s.%s" %(file_prefix, name)
-    
-    
-    #print('get_file_handlers: process_key:', process_key)
-    #traceback.print_stack()
-    filename=os.path.join(logdir, name)
-    handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
-    #handler.setLevel(logging_level)
-    handler.setFormatter(formatter)
-    result.append(handler)
-    # create error file handler and set level to error
-    
-    return result
-
-class MpLogger(object):
+class MpLogger(BaseLogger):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    #def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, logging_root=None, handlers=[], **kwargs):
     def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, handlers=[], **kwargs):
         '''Initiates MpLogger service
         
@@ -257,109 +162,26 @@ class MpLogger(object):
                 atTime=None
 
         '''
-        
-        self.logdir=logdir
-        if not os.path.isdir(logdir):
-            try:
-                os.makedirs(logdir, mode=0o744, exist_ok=True)
-            except:
-                raise
+        super(MpLogger, self).__init__(name=name, logdir=logdir, logging_level=logging_level, level_formats=level_formats, datefmt=datefmt, process_key=process_key, console=console, consolidate=consolidate, local_log=local_log, handlers=handlers, **kwargs)
             
-        self.logging_level=logging_level
-        self.level_formats=level_formats
-        self.datefmt=datefmt
-        self.record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
-        #self.logging_root=logging_root if logging_root is not None else name
-        self.logger_initialized=False
-        self.queue_listener=None
-        self.handlers=handlers
-        self.process_key=process_key
-        self.consolidate=consolidate
-        self.console=console
-        self.name=name
-        self.kwargs=kwargs
-        #self.encoding=encoding
-        #self.file_mode=file_mode
-        self.local_log=local_log
-        
-    def _global_file_handlers(self,):
-        #if not process_key: process_key=self.name
-        handlers=get_file_handler(logdir=self.logdir, logging_level=self.logging_level, process_key=self.name, formatter=self.record_formatter, **self.kwargs)
-        self.global_filename=handlers[0].filename
-        return handlers
-        #for handler in handlers:
-        #    self.queue_listener.addHandler(handler)  
-            
-    @classmethod
-    def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, process_key='', **kwargs):
-        '''
-        Args:
-            kwargs:
-                file_mode='a', 
-                maxBytes=0, 
-                backupCount=0, 
-                encoding='ascii', 
-                delay=False, 
-                when='h', 
-                interval=1, 
-                utc=False, 
-                atTime=None
-        '''
-        if not process_key: process_key=name
-        global_handlers=get_file_handler(logdir=logdir, logging_level=logging_level, process_key=process_key, formatter=record_formatter, **kwargs)
-        
-        for handler in global_handlers:
-            logger.addHandler(handler)  
-            
+        self.queue_listener = None
+                                
     def logger_info(self):
-        return {'process_key': self.process_key,
-                'logdir': self.logdir, 
-                'logging_level': self.logging_level,
-                'record_formatter': self.record_formatter,
-                'record_formatter': self.record_formatter,
+        info = super(MpLogger, self).logger_info()
+        info.update({
                 'loggerq': self.loggerq,
-                'handler_kwargs': self.kwargs,
-                'local_log': self.local_log,
-                'server_host': socket.gethostbyname(socket.gethostname()),
-               }
+               })
+        return info
             
     @classmethod
     def get_logger(cls, logger_info, name):
         # create the logger to use.
-        logger = logging.getLogger(name)
-        # The only handler desired is the SubProcessLogHandler.  If any others
-        # exist, remove them. In this case, on Unix and Linux the StreamHandler
-        # will be inherited.
-    
-        #for handler in logger.handlers:
-        #    # just a check for my sanity
-        #    assert not isinstance(handler, TimedSizedRotatingHandler)
-        #    logger.removeHandler(handler)
-        server_host=socket.gethostbyname(socket.gethostname())
-        
-        # server may already started logger
-        # if logger_info['server_host'] == server_host: return logger
-        
-        logging_level=logger_info['logging_level']
-        loggerq=logger_info['loggerq']
+        logger = BaseLogger.get_logger(logger_info, name)
+ 
+        loggerq = logger_info['loggerq']
         queue_handler = QueueHandler(loggerq)
         logger.addHandler(queue_handler)
 
-        # add the handler only if processing locally and this host is not server host.
-        
-        if logger_info['local_log'] and logger_info['server_host'] != server_host:
-            cls.add_file_handlers(name=name, process_key=logger_info['process_key'], 
-                                  logger=logger,
-                                  logdir=logger_info['logdir'], 
-                                  logging_level=logging_level,
-                                  record_formatter=logger_info['record_formatter'],
-                                  **logger_info['handler_kwargs'],
-                                  )
-        
-        # On Windows, the level will not be inherited.  Also, we could just
-        # set the level to log everything here and filter it in the main
-        # process handlers.  For now, just set it from the global default.
-        logger.setLevel(logging_level)     
         return logger
 
     def start(self, name=None):
@@ -383,23 +205,24 @@ class MpLogger(object):
         logger.setLevel(self.logging_level)
             
         manager=mp.Manager()    
-        self.loggerq=manager.Queue()
+        self.loggerq = manager.Queue()
         queue_handler = QueueHandler(self.loggerq)
         logger.addHandler(queue_handler)
         
         ghandlers=[]
         if self.logdir and self.consolidate: # and self.force_global:
-            ghandlers=self._global_file_handlers()
+            ghandlers=self.global_file_handlers()
         
-        self.queue_listener = MpQueueListener(self.loggerq, name=self.name, logging_level=self.logging_level, logdir=self.logdir, formatter=self.record_formatter, process_key=self.process_key, global_handlers=ghandlers, **self.kwargs)
+        self.queue_listener = LogRecordQueueListener(self.loggerq, name=self.name, logging_level=self.logging_level, logdir=self.logdir, formatter=self.record_formatter, process_key=self.process_key, global_handlers=ghandlers, **self.kwargs)
     
+        #super(BaseLogger, self).start()
         if len(self.handlers) == 0:
             if self.console:
-                handlers=create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
+                handlers = create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
                 for handler in handlers:
                     self.queue_listener.addConsoleHandler(handler)
             
-        else: # len(self.handlers) > 0:
+        if len(self.handlers) > 0:
             for handler in self.handlers:
                 self.queue_listener.addHandler(handler)
             
