@@ -226,10 +226,13 @@ class NwLogger(BaseLogger):
         # create the logger to use.
         #logger = BaseLogger.get_logger(logger_info, name)
  
-        name = name if name is not None else logger_info['name']
-        host = logger_info['host']
-        port = logger_info['port']
-        logging_level = logger_info['logging_level']
+        try:
+            name = name if name is not None else logger_info['name']
+            host = logger_info['host']
+            port = logger_info['port']
+            logging_level = logger_info['logging_level']
+        except Exception as e:
+            raise AcrilogError("Failed to get info from logger_info: {}".format(repr(logger_info))) from e
         logger = logging.getLogger(name)
         logger.setLevel(logging_level)
         socketHandler = logging.handlers.SocketHandler(host, port)

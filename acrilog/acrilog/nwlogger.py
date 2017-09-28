@@ -145,7 +145,6 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
         for handler in handlers:
             logger.addHandler(handler)
     
-    
     tcpserver = LogRecordSocketReceiver(host=host, port=port,)
     #print('About to start TCP server...', self.host, self.port)
     started.set()
@@ -245,3 +244,7 @@ class NwLogger(BaseLogger):
                 self.logger_proc.join()
         print('Stopped logger.')
  
+
+class NwLoggerSSHAgent(object):
+    ''' Can be initiated by remote logger via SshAgent
+    '''
