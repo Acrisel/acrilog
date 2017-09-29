@@ -30,6 +30,7 @@ import threading as th
 from acrilog.baselogger import BaseLogger, create_stream_handler
 from acrilog.utils import get_free_port
 from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
+import sshutil
 
 # TODO: get USE_QUEUE = True working without warnings at the end.
 USE_QUEUE = False
@@ -284,4 +285,5 @@ class NwLogger(BaseLogger):
             self.tcpserver.terminate()
             self.tcpserver.join()
             #print('Stopped logger.')
- 
+            
+        

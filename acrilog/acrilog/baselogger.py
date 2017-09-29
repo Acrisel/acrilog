@@ -86,6 +86,21 @@ def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, fo
 class BaseLogger(object):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
+    
+    kwargs_defaults = {
+                'file_mode':'a', 
+                'file_prefix':'',
+                'file_suffix':'',
+                'maxBytes':0, 
+                'backupCount':0, 
+                'encoding':'ascii', 
+                'delay':False, 
+                'when':'h', 
+                'interval':1, 
+                'utc':False, 
+                'atTime':None,
+               }
+    
     def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, handlers=[], **kwargs):
         '''Initiates MpLogger service
         
@@ -106,7 +121,6 @@ class BaseLogger(object):
                 file_suffix='',
                 maxBytes=0, 
                 backupCount=0, 
-                encoding='ascii', 
                 delay=False, 
                 when='h', 
                 interval=1, 
@@ -133,7 +147,8 @@ class BaseLogger(object):
         self.consolidate = consolidate
         self.console = console
         self.name = name
-        self.kwargs = kwargs
+        self.kwargs = copy(BaseLogger.kwargs_defaults)
+        self.kwargs.update(kwargs)
         #self.encoding=encoding
         #self.file_mode=file_mode
         self.local_log = local_log
@@ -172,8 +187,10 @@ class BaseLogger(object):
                 'process_key': self.process_key,
                 'logdir': self.logdir, 
                 'logging_level': self.logging_level,
-                'record_formatter': self.record_formatter,
+                #'record_formatter': self.record_formatter,
                 #'loggerq': self.loggerq,
+                'level_formats': self.level_formats,
+                'datefmt': self.datefmt,
                 'handler_kwargs': self.kwargs,
                 'local_log': self.local_log,
                 'server_host': socket.gethostbyname(socket.gethostname()),
@@ -205,11 +222,13 @@ class BaseLogger(object):
         # add the handler only if processing locally and this host is not server host.
         
         if logger_info['local_log'] and logger_info['server_host'] != server_host:
+            level_formats = logger_info['level_formats']
+            datefmt = logger_info['datefmt']
             cls.add_file_handlers(name=name, process_key=logger_info['process_key'], 
                                   logger=logger,
                                   logdir=logger_info['logdir'], 
                                   logging_level=logging_level,
-                                  record_formatter=logger_info['record_formatter'],
+                                  record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt),
                                   **logger_info['handler_kwargs'],
                                   )
         
