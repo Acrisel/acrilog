@@ -49,7 +49,7 @@ class NwLoggerClientHandler(logging.Handler):
     
     NwLoggerClientHandler create handler object that sends 
     '''
-    def __init__(self, logger_info, local=False):
+    def __init__(self, logger_info,):
         ''' Initiate logger client on remote connecting to host:port
         
         Args:
@@ -57,7 +57,7 @@ class NwLoggerClientHandler(logging.Handler):
             local: indicates creation of local logs on remote host.
         '''
         self.logger_info = logger_info
-        self.local = local
+        #self.local = local
         
         command = ["{}".format(__file__),]
         kwargs = {"--name": logger_info['name'],
