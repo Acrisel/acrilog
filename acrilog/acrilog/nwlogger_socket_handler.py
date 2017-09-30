@@ -56,18 +56,21 @@ class NwLoggerClientHandler(logging.Handler):
             logger_info: result of NwLogger.logger_info().
             local: indicates creation of local logs on remote host.
         '''
+        super(NwLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
         #self.local = local
         
         command = ["{}".format(__file__),]
         server_host = logger_info['server_host']
         kwargs = {"--name": logger_info['name'],
-                  "--host": logger_info['host'],
+                  "--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
                   "--logging-level": logger_info['logging_level'],
                   }
-        command.append(["{} {}".format(name, value) for name, value in kwargs.items()])
-        self.sshpipe = sshutil.SSHPipe(server_host, ' '.join(command))
+        command.extend(["{} {}".format(name, value) for name, value in kwargs.items()])
+        command = ' '.join(command)
+        #print('running SSHPipe:', server_host, command)
+        self.sshpipe = sshutil.SSHPipe(server_host, command)
         self.sshpipe.start()
         
         
