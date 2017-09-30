@@ -134,7 +134,7 @@ class LogRecordQueueListener(QueueListener):
 class MpLogger(BaseLogger):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, handlers=[], **kwargs):
+    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, handlers=[], **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -162,7 +162,7 @@ class MpLogger(BaseLogger):
                 atTime=None
 
         '''
-        super(MpLogger, self).__init__(name=name, logdir=logdir, logging_level=logging_level, level_formats=level_formats, datefmt=datefmt, process_key=process_key, console=console, consolidate=consolidate, local_log=local_log, handlers=handlers, **kwargs)
+        super(MpLogger, self).__init__(name=name, logdir=logdir, logging_level=logging_level, level_formats=level_formats, datefmt=datefmt, process_key=process_key, console=console, consolidate=consolidate, handlers=handlers, **kwargs)
             
         self.queue_listener = None
                                 

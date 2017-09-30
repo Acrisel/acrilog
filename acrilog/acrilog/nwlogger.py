@@ -212,7 +212,7 @@ class NwLogger(BaseLogger):
         self.abort = mp.Value('i', 0)
         started = mp.Event()
         
-        start_nwlogger_kwargs={
+        start_nwlogger_kwargs = {
             'name':self.name, 
             'host':self.host, 
             'port':self.port, 

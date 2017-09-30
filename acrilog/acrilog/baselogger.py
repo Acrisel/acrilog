@@ -118,7 +118,7 @@ class BaseLogger(object):
                 'atTime':None,
                }
     
-    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, local_log=True, handlers=[], **kwargs):
+    def __init__(self, name='logger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, handlers=[], **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -168,7 +168,7 @@ class BaseLogger(object):
         self.kwargs.update(kwargs)
         #self.encoding=encoding
         #self.file_mode=file_mode
-        self.local_log = local_log
+        #self.local_log = local_log
         
     def global_file_handlers(self,):
         #if not process_key: process_key=self.name
@@ -209,7 +209,7 @@ class BaseLogger(object):
                 'level_formats': self.level_formats,
                 'datefmt': self.datefmt,
                 'handler_kwargs': self.kwargs,
-                'local_log': self.local_log,
+                #'local_log': self.local_log,
                 'server_host': socket.gethostbyname(socket.gethostname()),
                }
             
@@ -238,7 +238,7 @@ class BaseLogger(object):
 
         # add the handler only if processing locally and this host is not server host.
         
-        if logger_info['local_log'] and logger_info['server_host'] != server_host:
+        if logger_info['server_host'] != server_host:
             level_formats = logger_info['level_formats']
             datefmt = logger_info['datefmt']
             cls.add_file_handlers(name=name, process_key=logger_info['process_key'], 
