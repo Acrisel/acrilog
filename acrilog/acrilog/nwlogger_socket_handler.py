@@ -60,13 +60,14 @@ class NwLoggerClientHandler(logging.Handler):
         #self.local = local
         
         command = ["{}".format(__file__),]
+        server_host = logger_info['server_host']
         kwargs = {"--name": logger_info['name'],
                   "--host": logger_info['host'],
                   "--port": logger_info['port'],
                   "--logging-level": logger_info['logging_level'],
                   }
         command.append(["{} {}".format(name, value) for name, value in kwargs.items()])
-        self.sshpipe = sshutil.SSHPipe(self.host, ' '.join(command))
+        self.sshpipe = sshutil.SSHPipe(server_host, ' '.join(command))
         self.sshpipe.start()
         
         
