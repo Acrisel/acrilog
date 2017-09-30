@@ -31,7 +31,23 @@ import sys
 import socket
 import traceback
 from acrilog.formatters import LevelBasedFormatter
-        
+from acrilog.utils import get_hostname, get_ip_address
+     
+     
+class LoggerAddHostFilter(logging.Filter):
+    """
+    This is filter adds host information to LogRecord.
+    """
+
+    #USERS = ['jim', 'fred', 'sheila']
+    #IPS = ['123.231.231.123', '127.0.0.1', '192.168.0.1']
+
+    def filter(self, record):
+
+        record.host = get_hostname()
+        record.ip = get_ip_address()
+        return True
+
     
 def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=None):
     handlers=list()

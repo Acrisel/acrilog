@@ -27,8 +27,8 @@ import socketserver
 import struct
 import multiprocessing as mp
 import threading as th
-from acrilog.baselogger import BaseLogger, create_stream_handler
-from acrilog.utils import get_free_port
+from acrilog.baselogger import BaseLogger, create_stream_handler, LoggerAddHostFilter
+from acrilog.utils import get_free_port, get_hostname, get_ip_address
 from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
 import sshutil
 
@@ -151,6 +151,7 @@ class NwFilter(logging.Filter):
         act = name.startswith(self.name)
         return act
     
+    
 def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     ''' starts logger for multiprocessing using queue.
      
@@ -161,6 +162,7 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
     
     logger = logging.getLogger(name=name)
     logger.setLevel(logging_level)
+    logger.addFilter(LoggerAddHostFilter())
     
     if USE_QUEUE:
         logger_queue_receiver = LoggerQueueReceiver(name=name, logging_level=logging_level, formatter=formatter, level_formats=level_formats, datefmt=datefmt, console=console, args=args, kwargs=kwargs)
@@ -240,7 +242,7 @@ class NwLogger(BaseLogger):
         #print('get_logger adding handler pid:', os.getpid())
         # socket handler sends the event as an unformatted pickle
         logger.addHandler(socketHandler)
-
+        logger.addFilter(LoggerAddHostFilter())
         return logger
     
     #def get_server_logger(self):
