@@ -204,7 +204,7 @@ class NwLogger(BaseLogger):
         self.name = name 
         self.logging_level = logging_level
         self.args = args
-        self.kwargs = kwargs
+        #self.kwargs = kwargs
         
         if port is None:
             try:

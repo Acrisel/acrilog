@@ -200,7 +200,8 @@ class BaseLogger(object):
             logger.addHandler(handler)  
             
     def logger_info(self):
-        return {'name': self.name,
+        hostname = socket.gethostbyname(socket.gethostname())
+        info = {'name': self.name,
                 'process_key': self.process_key,
                 'logdir': self.logdir, 
                 'logging_level': self.logging_level,
@@ -210,8 +211,9 @@ class BaseLogger(object):
                 'datefmt': self.datefmt,
                 'handler_kwargs': self.kwargs,
                 #'local_log': self.local_log,
-                'server_host': socket.gethostbyname(socket.gethostname()),
+                'server_host': hostname,
                }
+        return info
             
     @classmethod
     def get_logger(cls, logger_info, name):

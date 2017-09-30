@@ -88,6 +88,7 @@ def get_file_handler(logdir='', name=None, formatter=None, file_prefix=None, fil
     #print('get_file_handlers: process_key:', process_key)
     #traceback.print_stack()
     filename = os.path.join(logdir, name)
+    del kwargs['delay']
     handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
     #handler.setLevel(logging_level)
     #formatter = formatter if formatter is not None else LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
