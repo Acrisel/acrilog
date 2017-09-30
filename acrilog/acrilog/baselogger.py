@@ -44,8 +44,9 @@ class LoggerAddHostFilter(logging.Filter):
 
     def filter(self, record):
 
-        record.host = get_hostname()
-        record.ip = get_ip_address()
+        if not hasattr(record, 'host'):
+            record.host = get_hostname()
+            record.ip = get_ip_address()
         return True
 
     
