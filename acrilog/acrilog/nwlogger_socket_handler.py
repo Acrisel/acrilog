@@ -98,4 +98,4 @@ if __name__ == '__main__':
     mp.set_start_method('spawn')
     
     args = cmdargs()
-    start_nwlogger_client(**args.vars())
+    start_nwlogger_client(**vars(args))
