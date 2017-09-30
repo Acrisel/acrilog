@@ -231,6 +231,7 @@ class NwLogger(BaseLogger):
  
         try:
             name = name if name is not None else logger_info['name']
+            # We don't really need host, since it is always localhost
             host = logger_info['host']
             port = logger_info['port']
             logging_level = logger_info['logging_level']

@@ -71,7 +71,7 @@ if "install" in sys.argv:
             overlay_warning = True
             break
         
-scripts=[]
+scripts=['acrilog/nwlogger_socket_handler.py']
         
 # Find all sub packages
 packages=list()
