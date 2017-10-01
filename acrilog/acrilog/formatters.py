@@ -40,7 +40,7 @@ class LevelBasedFormatter(logging.Formatter):
         self.datefmt = datefmt  
         self.formats = dict([(level, MicrosecondsDatetimeFormatter(fmt=fmt, datefmt=self.datefmt)) for level, fmt in formats.items()])
         self.default_format = self.formats['default']  
-        logging.Formatter.__init__(self,) # fmt=self.default_format, datefmt=self.datefmt)
+        #super(LevelBasedFormatter, self).__init__() # fmt=self.default_format, datefmt=self.datefmt)
 
     def format(self, record):
         formatter = self.formats.get(record.levelno, self.default_format,)
