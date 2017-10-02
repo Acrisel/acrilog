@@ -23,12 +23,13 @@
 import logging
 from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
-from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
+from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler, LoggerAddHostFilter
+from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
 
 
-class LogRecordQueueListener(QueueListener):
+class LogRecordQueueListener_delete(QueueListener):
     def __init__(self, queue, name=None, logging_level=logging.INFO, logdir=None, formatter=None, process_key=['processName'], global_handlers=[], **kwargs):
-        super(LogRecordQueueListener, self).__init__(queue, *global_handlers)
+        super(LogRecordQueueListener_delete, self).__init__(queue, *global_handlers)
         """ Initialize an instance with the specified queue and
         handlers.
         
@@ -129,12 +130,67 @@ class LogRecordQueueListener(QueueListener):
         if hdlr in self.handlers:
             hdlr.close()
             self.handlers.remove(hdlr)
+
+class LogRecordQueueListener(QueueListener):
+    def __init__(self, queue,): # *handlers):
+        super(LogRecordQueueListener, self).__init__(queue,)# *handlers)
+        
+    def handle(self, record):
+        name = record.name
+        logger = logging.getLogger(name)
+        record = self.prepare(record)
+        logger.handle(record)
+
+    def start_server_until_stopped(self, abort):
+        self.start()
+        abort.wait()
+        self.stop()
+
+
+def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
+    #logger = logging.getLogger(name=self.logging_root)
+    logger = logging.getLogger(name=name)
+    logger.setLevel(logging_level)
+    logger.addFilter(LoggerAddHostFilter())
+    
+    #queue_handler = LogRecordQueueHandler(loggerq)
+    #logger.addHandler(queue_handler)
+    
+    handlers = [HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)]
+    if console:
+        console_handlers = create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
+        handlers.extend(console_handlers)
+        
+    for handler in handlers:
+        logger.addHandler(handler)
             
+    queue_listener = LogRecordQueueListener(loggerq,) # *handlers)
+    #queue_listener = LogRecordQueueListener(loggerq, name=name, logging_level=logging_level, logdir=logdir, formatter=record_formatter, process_key=process_key, global_handlers=ghandlers, **kwargs)
+    
+    '''
+    #super(BaseLogger, self).start()
+    if len(self.handlers) == 0:
+        if self.console:
+            handlers = create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
+            for handler in handlers:
+                self.queue_listener.addConsoleHandler(handler)
+        
+    if len(self.handlers) > 0:
+        for handler in self.handlers:
+            self.queue_listener.addHandler(handler)
+    '''
+        
+    started.set()
+    queue_listener.start_server_until_stopped(abort)
+    #logger_name=name
+    #logger = logging.getLogger(name=logger_name) #if get else None
+    #return queue_listener
+    finished.set()
 
 class MpLogger(BaseLogger):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name='mplogger', logdir=None, logging_level=logging.INFO, level_formats={}, datefmt=None, process_key=['name'], console=True, consolidate=False, handlers=[], **kwargs):
+    def __init__(self, name='logger', logging_level=logging.INFO, *args, **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -162,10 +218,14 @@ class MpLogger(BaseLogger):
                 atTime=None
 
         '''
-        super(MpLogger, self).__init__(name=name, logdir=logdir, logging_level=logging_level, level_formats=level_formats, datefmt=datefmt, process_key=process_key, console=console, consolidate=consolidate, handlers=handlers, **kwargs)
+        super(MpLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
             
         self.queue_listener = None
-                                
+        self.abort = None
+        #self.args = args
+        #self.kwargs = kwargs
+        self.logger_initialized = False
+                                        
     def logger_info(self):
         info = super(MpLogger, self).logger_info()
         info.update({
@@ -177,14 +237,14 @@ class MpLogger(BaseLogger):
     def get_logger(cls, logger_info, name):
         # create the logger to use.
         logger = BaseLogger.get_logger(logger_info, name)
- 
+        logger.addFilter(LoggerAddHostFilter())
         loggerq = logger_info['loggerq']
         queue_handler = QueueHandler(loggerq)
         logger.addHandler(queue_handler)
 
         return logger
 
-    def start(self, name=None):
+    def start(self, name=None, ):
         ''' starts logger for multiprocessing using queue.
         
         Args:
@@ -198,38 +258,46 @@ class MpLogger(BaseLogger):
         #if MpLogger.logger_initialized:
         if self.logger_initialized:
             return
-        
         self.logger_initialized=True
-        #logger = logging.getLogger(name=self.logging_root)
-        logger = logging.getLogger(name=self.name)
-        logger.setLevel(self.logging_level)
-            
+        
+        #self.manager = mp.Manager()
+        #self.controller = self.manager.Namespace()
         manager=mp.Manager()    
         self.loggerq = manager.Queue()
-        queue_handler = QueueHandler(self.loggerq)
-        logger.addHandler(queue_handler)
+
+        self.abort = mp.Event()
+        started = mp.Event()
+        self.finished = mp.Event()
         
-        ghandlers=[]
-        if self.logdir and self.consolidate: # and self.force_global:
-            ghandlers=self.global_file_handlers()
+        start_nwlogger_kwargs = {
+            'name': self.name, 
+            'loggerq': self.loggerq, 
+            'logging_level': self.logging_level, 
+            'formatter': self.record_formatter, 
+            'level_formats': self.level_formats, 
+            'datefmt': self.datefmt, 
+            'console': self.console,
+            'started': started, 
+            'abort': self.abort, 
+            'finished': self.finished,   
+            'args': self.handler_args, 
+            'kwargs': self.handler_kwargs,
+            }
+        self.logger_proc = mp.Process(target=start_mplogger, kwargs=start_nwlogger_kwargs, daemon=True)
+        self.logger_proc.start()
         
-        self.queue_listener = LogRecordQueueListener(self.loggerq, name=self.name, logging_level=self.logging_level, logdir=self.logdir, formatter=self.record_formatter, process_key=self.process_key, global_handlers=ghandlers, **self.kwargs)
-    
-        #super(BaseLogger, self).start()
-        if len(self.handlers) == 0:
-            if self.console:
-                handlers = create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
-                for handler in handlers:
-                    self.queue_listener.addConsoleHandler(handler)
-            
-        if len(self.handlers) > 0:
-            for handler in self.handlers:
-                self.queue_listener.addHandler(handler)
-            
-        self.queue_listener.start()
-        logger_name=name if name is not None else self.name
-        return logging.getLogger(name=logger_name)
+        started.wait()        
+
+    def stop(self,):
+        if self.abort:
+            self.abort.set()
+            self.finished.wait()
+            if self.logger_proc.is_alive():
+                #print('Joining logger.')
+                self.logger_proc.join()
+        #print('Stopped logger.')
         
+    '''    
     def stop(self,):
         if self.queue_listener:
             self.queue_listener.stop()
@@ -237,7 +305,8 @@ class MpLogger(BaseLogger):
     def quite(self,):
         if self.queue_listener:
             self.queue_listener.enqueue_sentinel()
-
+    '''
+                
 if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')

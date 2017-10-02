@@ -28,7 +28,7 @@ import struct
 import select
 import multiprocessing as mp
 import threading as th
-from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
+from acrilog.baselogger import BaseLogger, create_stream_handler, LoggerAddHostFilter
 from acrilog.utils import get_free_port
 from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
 
@@ -65,18 +65,25 @@ class LogRecordStreamHandler(socketserver.StreamRequestHandler):
     def unPickle(self, data):
         return pickle.loads(data)
 
+    def prepate(self, record):
+        return record
+    
     def handleLogRecord(self, record):
+        '''
         # if a name is specified, we use the named logger rather than the one
         # implied by the record.
         if self.server.logname is not None:
             name = self.server.logname
         else:
             name = record.name
+        '''
+        name = record.name.partition('.')[0]
         logger = logging.getLogger(name)
         # N.B. EVERY record gets logged. This is because Logger.handle
         # is normally called AFTER logger-level filtering. If you want
         # to do filtering, do it at the client end to save wasting
         # cycles and network bandwidth!
+        record = self.prepare(record)
         logger.handle(record)
         
 
@@ -88,13 +95,13 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
 
     def __init__(self, host='localhost',
-        port=logging.handlers.DEFAULT_TCP_LOGGING_PORT,
-        handler=LogRecordStreamHandler):
+        port = logging.handlers.DEFAULT_TCP_LOGGING_PORT,
+        handler = LogRecordStreamHandler):
         socketserver.ThreadingTCPServer.__init__(self, (host, port), handler)
         self.timeout = 1
         self.logname = None
 
-    def serve_until_stopped(self, abort):
+    def start(self, abort):
         while not abort.value:
             #rd, wr, ex = select.select([self.socket.fileno()],
             rd, wr, ex = select.select([self.fileno()],
@@ -103,7 +110,7 @@ class LogRecordSocketReceiver(socketserver.ThreadingTCPServer):
             if rd:
                 self.handle_request()
         self.server_close()
-        print('aborted serve_until_stopped.')
+        #print('aborted serve_until_stopped.')
        
 
 class NwFilter(logging.Filter):
@@ -121,7 +128,7 @@ class NwFilter(logging.Filter):
         act = name.startswith(self.name)
         return act
     
-def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, args=(), kwargs={},):
+def start_nwlogger(name=None, host=None, port=None, logging_level=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, args=(), kwargs={},):
     ''' starts logger for multiprocessing using queue.
      
     Returns:
@@ -135,38 +142,38 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
     #self.logger_initialized = True
     
     #logger = logging.getLogger(name=self.logging_root)
-    logger = logging.getLogger(name=name)
+    logger = logging.getLogger(name='')
     logger.setLevel(logging_level)
     
-    handler = HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)
-    logger.addHandler(handler)
+    handlers = [HierarchicalTimedSizedRotatingHandler(*args, **kwargs)]
     if console:
-        handlers = create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
-        for handler in handlers:
-            logger.addHandler(handler)
+        console_handlers = create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
+        handlers.extend(console_handlers)
+            
+    for handler in handlers:
+        logger.addHandler(handler)
     
     tcpserver = LogRecordSocketReceiver(host=host, port=port,)
     #print('About to start TCP server...', self.host, self.port)
     started.set()
-    tcpserver.serve_until_stopped(abort)
+    tcpserver.start(abort)
     #print('shutting down tcp server.')
     #tcpserver.shutdown()
-    print('finished start_nwlogger.')
+    #print('finished start_nwlogger.')
     return 
 
 class NwLogger(BaseLogger):
-    def __init__(self, name='nwlogger', host='localhost', port=None, logging_level=logging.INFO, *args, **kwargs):    
+    def __init__(self, name='logger', host='localhost', port=None, logging_level=logging.INFO, *args, **kwargs):    
         super(NwLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
         
         self.host = host
         self.logger_initialized = False
-        self.name = name 
-        self.logging_level = logging_level
         #self.controller = None
         self.abort = None
-        self.args = args
-        self.kwargs = kwargs
+        #self.args = args
+        #self.kwargs = kwargs
         
+        print('NwLogger self.kwargs:', kwargs)
         
         if port is None:
             try:
@@ -200,7 +207,8 @@ class NwLogger(BaseLogger):
         socketHandler = logging.handlers.SocketHandler(host, port)
         # socket handler sends the event as an unformatted pickle
         logger.addHandler(socketHandler)
-
+        # It is enough to add LoggerAddHostFilter on the server only.
+        #logger.addFilter(LoggerAddHostFilter())
         return logger
     
     #def get_server_logger(self):
@@ -211,9 +219,11 @@ class NwLogger(BaseLogger):
         #self.controller = self.manager.Namespace()
         self.abort = mp.Value('i', 0)
         started = mp.Event()
+        manager=mp.Manager() 
+        self.loggerq = manager.Queue()
+        
         
         start_nwlogger_kwargs = {
-            'name':self.name, 
             'host':self.host, 
             'port':self.port, 
             'logging_level':self.logging_level, 
@@ -223,8 +233,8 @@ class NwLogger(BaseLogger):
             'console':self.console,
             'started':started, 
             'abort':self.abort, 
-            'args':self.args, 
-            'kwargs':self.kwargs,
+            'args':self.handler_args, 
+            'kwargs':self.handler_kwargs,
             }
         self.logger_proc = mp.Process(target=start_nwlogger, kwargs=start_nwlogger_kwargs, daemon=True)
         self.logger_proc.start()
@@ -240,9 +250,9 @@ class NwLogger(BaseLogger):
         if self.abort:
             self.abort.value = 1
             if self.logger_proc.is_alive():
-                print('Joining logger.')
+                #print('Joining logger.')
                 self.logger_proc.join()
-        print('Stopped logger.')
+        #print('Stopped logger.')
  
 
 class NwLoggerSSHAgent(object):

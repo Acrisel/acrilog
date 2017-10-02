@@ -266,9 +266,9 @@ class NwLogger(BaseLogger):
             'console': self.console,
             'started': self.started, 
             'abort': self.abort, 
-            'finished': self.finished, 
-            'args': self.args, 
-            'kwargs': self.kwargs,
+            'finished': self.finished,     
+            'args':self.handler_args, 
+            'kwargs':self.handler_kwargs,
         }
         
         self.tcpserver = mp.Process(name='NwLogger', target=start_nwlogger, kwargs=start_nwlogger_kwargs, daemon=False)
@@ -284,7 +284,7 @@ class NwLogger(BaseLogger):
             self.abort.set()
             #print('Joining tcpserver.')
             self.finished.wait()
-            self.started.clear(); self.finished.clear(); self.abort.clear()
+            #self.started.clear(); self.finished.clear(); self.abort.clear()
             # TODO: need to work without explicitly calling terminate
             self.tcpserver.terminate()
             self.tcpserver.join()
