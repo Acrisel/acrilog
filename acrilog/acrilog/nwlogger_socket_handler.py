@@ -26,6 +26,7 @@ from acrilog import NwLogger
 import os
 import sshutil
 import logging
+from acrilog.utils import get_hostname, get_ip_address
 
 def start_nwlogger_client(**logger_info):
     logger = NwLogger.get_logger(logger_info)
@@ -76,6 +77,9 @@ class NwLoggerClientHandler(logging.Handler):
         self.sshpipe.start()
         
     def emit(self, record):
+        #if not hasattr(record, 'host'):
+        #    record.host = get_hostname()
+        #    record.ip = get_ip_address()
         self.sshpipe.send(record)
         
 def cmdargs():

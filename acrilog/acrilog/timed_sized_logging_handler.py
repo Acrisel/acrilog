@@ -79,6 +79,13 @@ def get_file_handler(logdir='', name=None, formatter=None, file_prefix=None, fil
     result=list()
     if logdir is None: logdir=''
     
+    if logdir:
+        if not os.path.isdir(logdir):
+            try:
+                os.makedirs(logdir, mode=0o744, exist_ok=True)
+            except:
+                raise
+
     #key_s=''
     if file_suffix: name = "%s.%s" %(name, file_suffix)
     if name: name = "%s.log" % name
@@ -88,8 +95,8 @@ def get_file_handler(logdir='', name=None, formatter=None, file_prefix=None, fil
     #print('get_file_handlers: process_key:', process_key)
     #traceback.print_stack()
     filename = os.path.join(logdir, name)
-    del kwargs['delay']
-    handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
+    #del kwargs['delay']
+    handler = TimedSizedRotatingHandler(filename=filename, **kwargs)
     #handler.setLevel(logging_level)
     #formatter = formatter if formatter is not None else LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
     #print('get_file_handler formatter:', formatter)
@@ -101,7 +108,7 @@ def get_file_handler(logdir='', name=None, formatter=None, file_prefix=None, fil
     return result
 
 class HierarchicalTimedSizedRotatingHandler(Handler):
-    def __init__(self, key='name', separator='.', consolidate=False, formatter=None, *args, **kwargs):
+    def __init__(self, key='name', separator='.', consolidate=False, *args, **kwargs):
         ''' Maintains TimedSizedRotatingHandler handlers according to hierarchy
         
         Args:
@@ -133,10 +140,9 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
 
         self.separator = separator
         self.key = key
-        self.formatter = formatter
         self.consolidate = consolidate
-        self.args = args
-        self.kwargs = kwargs
+        self.handler_args = args
+        self.handler_kwargs = kwargs
         self.__handlers = dict()
         
     def handle(self, record):
@@ -148,7 +154,7 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
         """
         
         # Find handlers that match process keys
-        handlers = list()
+        
         #attributes = record.__dict__
         #record_name = attributes.get('name', None)
         record_name = getattr(record, 'name')
@@ -156,7 +162,7 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
         #record_key = attributes.get(self.key, None)
         try: record_key = getattr(record, self.key)
         except KeyError: record_key = ''
-        #print('record_key[process_key]: %s[%s]' %(record_key, process_key))
+        #print('record_key[process_key]: %s[%s]' %(record_key, self.key))
         #print('record_key[processName]: %s' %(repr(record.__dict__)))
         
         keys = [record_key]
@@ -168,22 +174,20 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
                 left_key = left_key.rpartition(self.separator)[0]
         
         #print('consolidate keys %s: %s' % (record_key, keys))
+        handlers = list()
         for record_key in keys:
             #if record_key: 
             #process_handlers = self.handlers[process_key]
-            key_handlers = self.__handlers.get(record_key, list())
-            
+            key_handlers = self.__handlers.get(record_key,)
             # avoid getting dedicated handler in special case when in consolidated mode and record with 
             # name equal to the global.
-            need_handler = len(key_handlers) == 0 or record_key != self.name 
+            need_handler = key_handlers is None or record_key != self.name 
             if need_handler:
-                name = record_key
-                key_handlers = get_file_handler(*self.args, name=name, formatter=self.formatter, **self.kwargs)
+                key_handlers = get_file_handler(*self.handler_args, name=record_key, **self.handler_kwargs)
                 self.__handlers[record_key] = key_handlers
                 
             handlers.extend(key_handlers)
                 
-        #print('consolidate keys handlers:', len(key_handlers))
         #if len(self.global_handlers) > 0:
         #    handlers.extend(self.global_handlers)
             
@@ -218,8 +222,8 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
                 self.key_handlers[key]=exist_handler
                 exist_handler.append(handler)
                 key_bind=True
-        if not key_bind:
-            self.global_handlers.append(handler)
+        #if not key_bind:
+        #    self.global_handlers.append(handler)
 
     def removeHandler(self, hdlr):
         """
