@@ -52,7 +52,7 @@ class NwLoggerClientHandler(logging.Handler):
     NwLoggerClientHandler create handler object that sends 
     '''
     
-    def __init__(self, logger_info, ssh_host, ):
+    def __init__(self, logger_info, ssh_host, logger=None):
         ''' Initiate logger client on remote connecting to host:port
         
         Args:
@@ -74,7 +74,12 @@ class NwLoggerClientHandler(logging.Handler):
         command = ' '.join(command)
         #print('running SSHPipe:', ssh_host, command)
         self.sshpipe = sshutil.SSHPipe(ssh_host, command,)
+        if logger:
+            logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
         self.sshpipe.start()
+        
+        if logger:
+            logger.debug("Remote logger SSHPipe started".format(ssh_host, command))
         
     def emit(self, record):
         #if not hasattr(record, 'host'):
