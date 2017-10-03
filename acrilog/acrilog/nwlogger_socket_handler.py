@@ -79,13 +79,15 @@ class NwLoggerClientHandler(logging.Handler):
         self.sshpipe.start()
         
         if logger:
-            logger.debug("Remote logger SSHPipe started".format(ssh_host, command))
+            logger.debug("Remote logger SSHPipe started.")
         
     def emit(self, record):
         #if not hasattr(record, 'host'):
         #    record.host = get_hostname()
-        #    record.ip = get_ip_address()
+        #    record.ip = get_ip_address()if logger:
+        logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         self.sshpipe.send(record)
+        logger.debug("Emitted.".format(repr(record)))
         
 def cmdargs():
     import argparse
