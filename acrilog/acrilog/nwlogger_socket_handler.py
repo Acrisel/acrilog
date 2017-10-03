@@ -74,7 +74,8 @@ class NwLoggerClientHandler(logging.Handler):
         command = ' '.join(command)
         #print('running SSHPipe:', ssh_host, command)
         
-        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logger_info['name'], logdir=logdir)
+        sshname = '{}.sshpipe.log'.format(logger_info['name'])
+        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=sshname, logdir=logdir)
         
         if logger:
             logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
