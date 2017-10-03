@@ -63,10 +63,10 @@ class NwLoggerClientHandler(logging.Handler):
         self.logger_info = logger_info
         #self.local = local
         
-        command = ["{}".format(__file__),]
+        command = ["{}".format(os.path.basename(__file__)),]
         server_host = logger_info['server_host']
         kwargs = {"--name": logger_info['name'],
-                  "--host": server_host, #logger_info['host'],
+                  #"--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
                   "--logging-level": logger_info['logging_level'],
                   }
@@ -91,8 +91,8 @@ def cmdargs():
     parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
     parser.add_argument('--name', type=str, 
                         help="""Logger name.""")
-    parser.add_argument('--host', type=str, 
-                        help="""Host to forward messages to (localhost).""")
+    #parser.add_argument('--host', type=str, 
+    #                    help="""Host to forward messages to (localhost).""")
     parser.add_argument('--port', type=int, 
                         help="""Port to forward messages to.""")
     parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
