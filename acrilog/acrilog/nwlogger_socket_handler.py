@@ -64,7 +64,7 @@ class NwLoggerClientHandler(logging.Handler):
         #self.local = local
         
         command = ["{}".format(os.path.basename(__file__)),]
-        server_host = logger_info['server_host']
+        #server_host = logger_info['server_host']
         kwargs = {"--name": logger_info['name'],
                   #"--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
@@ -76,7 +76,7 @@ class NwLoggerClientHandler(logging.Handler):
         
         sshname = '{}.sshpipe.log'.format(logger_info['name'])
         self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=sshname, logdir=logdir)
-        
+        self.logger = logger
         if logger:
             logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
         self.sshpipe.start()
@@ -88,9 +88,12 @@ class NwLoggerClientHandler(logging.Handler):
         #if not hasattr(record, 'host'):
         #    record.host = get_hostname()
         #    record.ip = get_ip_address()if logger:
-        logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
+        logger = self.logger
+        if logger:
+            logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         self.sshpipe.send(record)
-        logger.debug("Emitted.".format(repr(record)))
+        if logger:
+            logger.debug("Emitted.".format(repr(record)))
         
 def cmdargs():
     import argparse
