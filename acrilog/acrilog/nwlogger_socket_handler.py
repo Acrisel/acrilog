@@ -88,9 +88,9 @@ class NwLoggerClientHandler(logging.Handler):
         #if not hasattr(record, 'host'):
         #    record.host = get_hostname()
         #    record.ip = get_ip_address()if logger:
-        logger = self.logger
-        if logger:
-            logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
+        #logger = self.logger
+        #if logger:
+        #    logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         self.sshpipe.send(record)
         
 def cmdargs():
