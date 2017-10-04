@@ -92,8 +92,6 @@ class NwLoggerClientHandler(logging.Handler):
         if logger:
             logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         self.sshpipe.send(record)
-        if logger:
-            logger.debug("Emitted.".format(repr(record)))
         
 def cmdargs():
     import argparse
