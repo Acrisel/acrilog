@@ -69,6 +69,7 @@ class NwLoggerClientHandler(logging.Handler):
                   #"--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
                   "--logging-level": logger_info['logging_level'],
+                  "--logdir": logdir,
                   }
         command.extend(["{} {}".format(name, value) for name, value in kwargs.items()])
         command = ' '.join(command)
@@ -91,7 +92,9 @@ class NwLoggerClientHandler(logging.Handler):
         #logger = self.logger
         #if logger:
         #    logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
-        self.sshpipe.send(record)
+        try:
+            self.sshpipe.send(record)
+        
         
 def cmdargs():
     import argparse
@@ -108,6 +111,8 @@ def cmdargs():
                         help="""Port to forward messages to.""")
     parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
                         help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
+    parser.add_argument('--logdir', type=string, default='/tmp',
+                        help="""Logdir to use, defaults to /tmp.""")
     args = parser.parse_args()  
     
     return args
