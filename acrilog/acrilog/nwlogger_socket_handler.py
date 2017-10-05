@@ -97,7 +97,7 @@ class NwLoggerClientHandler(logging.Handler):
         try:
             self.sshpipe.send(record)
         except Exception as e:
-            raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format()) from e
+            raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
 def cmdargs():
     import argparse
