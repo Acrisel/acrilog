@@ -89,7 +89,7 @@ class NwLoggerClientHandler(logging.Handler):
             logger.debug("Remote logger SSHPipe started.")
             
     def __logger_process_lambda(self,):
-        logger_info = deepcopy(self.__logger_info)
+        logger_info = deepcopy(self.logger_info)
         def internal(self, name=None):
             if name is not None:
                 logger_info['name'] = name
