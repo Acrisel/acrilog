@@ -28,6 +28,8 @@ import sshutil
 import logging
 from acrilog.utils import get_hostname, get_ip_address
 
+class NwLoggerHandlerError(Exception): pass
+
 def start_nwlogger_client(**logger_info):
     logger = NwLogger.get_logger(logger_info)
     data_queue = mp.Queue()
@@ -94,7 +96,8 @@ class NwLoggerClientHandler(logging.Handler):
         #    logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         try:
             self.sshpipe.send(record)
-        
+        except Exception as e:
+            raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format()) from e
         
 def cmdargs():
     import argparse
