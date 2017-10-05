@@ -106,6 +106,7 @@ class BaseLogger(object):
     '''
     
     kwargs_defaults = {
+        'logdir': '/tmp',
         'key':'name',
         'file_mode': 'a', 
         'file_prefix': '',
@@ -236,9 +237,10 @@ class BaseLogger(object):
         if logger_info['server_host'] != server_host:
             level_formats = logger_info['level_formats']
             datefmt = logger_info['datefmt']
-            cls.add_file_handlers(name=name, process_key=logger_info['process_key'], 
+            cls.add_file_handlers(name=name, 
+                                  #process_key=logger_info['process_key'], 
                                   logger=logger,
-                                  logdir=logger_info['logdir'], 
+                                  #logdir=logger_info['logdir'], 
                                   logging_level=logging_level,
                                   record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt),
                                   **logger_info['handler_kwargs'],

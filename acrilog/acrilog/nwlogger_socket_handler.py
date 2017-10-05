@@ -49,6 +49,7 @@ def start_nwlogger_client(**logger_info):
         if active:
             logger.handler(msg)
  
+ 
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
     
