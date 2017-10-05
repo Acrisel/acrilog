@@ -239,8 +239,16 @@ class MpLogger(BaseLogger):
         logger = BaseLogger.get_logger(logger_info, name)
         logger.addFilter(LoggerAddHostFilter())
         loggerq = logger_info['loggerq']
-        queue_handler = QueueHandler(loggerq)
-        logger.addHandler(queue_handler)
+        
+        # check logger has already proper handlers or not
+        already_set = False
+        for handler in logger.handlers:
+            if isinstance(handler, QueueHandler):
+                already_set = already_set or (handler.queue == loggerq)
+        
+        if not already_set:        
+            queue_handler = QueueHandler(loggerq)
+            logger.addHandler(queue_handler)
 
         return logger
 

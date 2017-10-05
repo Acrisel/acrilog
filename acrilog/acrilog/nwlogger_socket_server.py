@@ -234,17 +234,26 @@ class NwLogger(BaseLogger):
             # We don't really need host, since it is always localhost
             host = logger_info['host']
             port = logger_info['port']
-            logging_level = logger_info['logging_level']
+            #logging_level = logger_info['logging_level']
         except Exception as e:
             raise AcrilogError("Failed to get info from logger_info: {}".format(repr(logger_info))) from e
         
-        logger = logging.getLogger(name)
-        logger.setLevel(logging_level)
-        socketHandler = logging.handlers.SocketHandler(host, port)
-        #print('get_logger adding handler pid:', os.getpid())
-        # socket handler sends the event as an unformatted pickle
-        logger.addHandler(socketHandler)
-        logger.addFilter(LoggerAddHostFilter())
+        #logger = logging.getLogger(name)
+        #logger.setLevel(logging_level)
+        logger = BaseLogger.get_logger(logger_info, name)
+        
+        # check logger has already proper handlers or not
+        already_set = False
+        for handler in logger.handlers:
+            if isinstance(handler, logging.handlers.SocketHandler):
+                already_set = already_set or (handler.port == port and handler.host == host)
+                
+        if not already_set:
+            socketHandler = logging.handlers.SocketHandler(host, port)
+            #print('get_logger adding handler pid:', os.getpid())
+            # socket handler sends the event as an unformatted pickle
+            logger.addHandler(socketHandler)
+            logger.addFilter(LoggerAddHostFilter())
         return logger
     
     #def get_server_logger(self):

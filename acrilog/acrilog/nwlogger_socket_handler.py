@@ -114,7 +114,7 @@ def cmdargs():
                         help="""Port to forward messages to.""")
     parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
                         help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
-    parser.add_argument('--logdir', type=string, default='/tmp',
+    parser.add_argument('--logdir', type=str, default='/tmp',
                         help="""Logdir to use, defaults to /tmp.""")
     args = parser.parse_args()  
     
