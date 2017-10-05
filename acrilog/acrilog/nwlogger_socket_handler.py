@@ -26,6 +26,7 @@ from acrilog import NwLogger
 import os
 import sshutil
 import logging
+from copy import deepcopy
 from acrilog.utils import get_hostname, get_ip_address
 
 class NwLoggerHandlerError(Exception): pass
@@ -78,7 +79,7 @@ class NwLoggerClientHandler(logging.Handler):
         #print('running SSHPipe:', ssh_host, command)
         
         sshname = '{}.sshpipe.log'.format(logger_info['name'])
-        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=sshname, logdir=logdir)
+        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=sshname, get_logger=self.__logger_process_lambda())
         self.logger = logger
         if logger:
             logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
@@ -86,6 +87,15 @@ class NwLoggerClientHandler(logging.Handler):
         
         if logger:
             logger.debug("Remote logger SSHPipe started.")
+            
+    def __logger_process_lambda(self,):
+        logger_info = deepcopy(self.__logger_info)
+        def internal(self, name=None):
+            if name is not None:
+                logger_info['name'] = name
+            logger = NwLogger.get_logger(logger_info)
+            return logger
+        return internal
         
     def emit(self, record):
         #if not hasattr(record, 'host'):
