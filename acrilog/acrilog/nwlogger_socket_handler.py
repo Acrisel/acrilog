@@ -27,7 +27,16 @@ import os
 import sshutil
 import logging
 from copy import deepcopy
-from acrilog.utils import get_hostname, get_ip_address, logger_process_lambda
+from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
+
+def logger_process_lambda(logger_info):
+    logger_info = deepcopy(logger_info)
+    def internal(name=None):
+        if name is not None:
+            logger_info['name'] = name
+        logger = NwLogger.get_logger(logger_info)
+        return logger
+    return internal
 
 class NwLoggerHandlerError(Exception): pass
 

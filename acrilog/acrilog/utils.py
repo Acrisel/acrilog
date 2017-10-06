@@ -47,14 +47,6 @@ def hostname_resolves(hostname):
     except socket.error:
         return 0
 
-def logger_process_lambda(Logger, logger_info):
-    logger_info = deepcopy(logger_info)
-    def internal(name=None):
-        if name is not None:
-            logger_info['name'] = name
-        logger = Logger.get_logger(logger_info)
-        return logger
-    return internal
 
 
 if __name__ == '__main__':
