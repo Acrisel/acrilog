@@ -34,13 +34,19 @@ class NwLoggerHandlerError(Exception): pass
 def start_nwlogger_client(**logger_info):
     logger = NwLogger.get_logger(logger_info)
     data_queue = mp.Queue()
+    listener_started = mp.Event()
     
     kwargs = {
         'queue': data_queue,
+        'started_event': listener_started,
         }
     
     listener = mp.Process(target=sshutil.pipe_listener_forever, kwargs=kwargs, daemon=False)
     listener.start()
+    
+    logger.debug('Waiting for Remote logger pipe listener to start.')
+    listener_started.wait()
+    logger.debug('Remote logger pipe listener started.')
     
     active = True
     while active:
@@ -48,7 +54,8 @@ def start_nwlogger_client(**logger_info):
         active = msg not in ['TREM', 'STOP', 'FINISH'] # msg == sshutil.EXIT_MESSAGE
         if active:
             logger.handler(msg)
- 
+            
+    logger.debug('Remote logger pipe listener deactivated.')
  
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
