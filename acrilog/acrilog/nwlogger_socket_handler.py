@@ -29,6 +29,8 @@ import logging
 from copy import deepcopy
 from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
 
+module_logger = logging.getLogger(__name__)
+
 def logger_process_lambda(logger_info):
     logger_info = deepcopy(logger_info)
     def internal(name=None):
@@ -96,7 +98,7 @@ class NwLoggerClientHandler(logging.Handler):
         #print('running SSHPipe:', ssh_host, command)
         
         logname = '{}.sshpipe.log'.format(logger_info['name'])
-        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname,) # get_logger=logger_process_lambda(NwLogger, self.logger_info))
+        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=logger) # get_logger=logger_process_lambda(NwLogger, self.logger_info))
         self.logger = logger
         if logger:
             logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
