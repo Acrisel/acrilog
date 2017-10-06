@@ -4,6 +4,7 @@ Created on Sep 19, 2017
 @author: arnon
 '''
 import socket
+from copy import deepcopy
 
 LOCAL_HOST = '127.0.0.1'
 def get_free_port():
@@ -45,6 +46,15 @@ def hostname_resolves(hostname):
         return 1
     except socket.error:
         return 0
+
+def logger_process_lambda(Logger, logger_info):
+    logger_info = deepcopy(logger_info)
+    def internal(name=None):
+        if name is not None:
+            logger_info['name'] = name
+        logger = Logger.get_logger(logger_info)
+        return logger
+    return internal
 
 
 if __name__ == '__main__':
