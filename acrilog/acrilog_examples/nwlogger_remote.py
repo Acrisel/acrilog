@@ -19,6 +19,7 @@ def main():
         'name': 'example.e1',
         'port': 49740,
         'logging_level': 10,
+        'server_host': 'arnon-mbp',
         }
     handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris', logger=module_logger)
     logger = logging.getLogger('example.e1')
