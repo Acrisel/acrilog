@@ -8,6 +8,9 @@ from acrilog import NwLogger
 import multiprocessing as mp
 import logging
 from acrilog import NwLoggerClientHandler
+
+module_logger = logging.getLogger(__name__)
+module_logger.addHandler(logging.StreamHandler())
                     
 def main():
     
@@ -16,7 +19,7 @@ def main():
         'port': 49740,
         'logging_level': 10,
         }
-    handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris',)
+    handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris', logger=module_logger)
     logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
     
