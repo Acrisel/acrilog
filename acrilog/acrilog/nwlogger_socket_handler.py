@@ -27,7 +27,8 @@ import os
 import sshutil
 import logging
 from copy import deepcopy
-from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
+#from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
+from acrilog.baselogger import LoggerAddHostFilter
 
 module_logger = logging.getLogger(__name__)
 
@@ -84,6 +85,8 @@ class NwLoggerClientHandler(logging.Handler):
         super(NwLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
         #self.local = local
+        
+        self.addFilter(LoggerAddHostFilter())
         
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']

@@ -11,6 +11,7 @@ from acrilog import NwLoggerClientHandler
 
 module_logger = logging.getLogger(__name__)
 module_logger.addHandler(logging.StreamHandler())
+module_logger.setLevel(logging.DEBUG)
                     
 def main():
     
