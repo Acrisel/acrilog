@@ -128,6 +128,11 @@ class NwLoggerClientHandler(logging.Handler):
         except Exception as e:
             raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
+    def close(self):
+        self.sshpipe.close()
+        self.sshpipe.join()
+        super(NwLoggerClientHandler, self).close()
+        
 def cmdargs():
     import argparse
     

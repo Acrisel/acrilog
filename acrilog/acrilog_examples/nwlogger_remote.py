@@ -24,6 +24,8 @@ def main():
     logger.warning('Jail zesty vixen who grabbed pay from quack.')
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
+    
+    handler.close()
      
 if __name__ == '__main__':
     mp.freeze_support()
