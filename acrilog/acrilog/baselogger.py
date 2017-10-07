@@ -32,6 +32,7 @@ import socket
 import traceback
 from acrilog.formatters import LevelBasedFormatter
 from acrilog.utils import get_hostname, get_ip_address
+from copy import deepcopy
      
      
 class LoggerAddHostFilter(logging.Filter):
@@ -120,6 +121,14 @@ class BaseLogger(object):
         'utc': False, 
         'atTime': None,
        }
+    
+    logger_info_defaults = {
+        'level_formats': {
+                logging.DEBUG: "[ %(asctime)-15s ][ %(host)s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
+                'default': "[ %(asctime)-15s ][ %(host)s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ]",
+                },
+         'datefmt': '%Y-%m-%d,%H:%M:%S.%f',
+            }
     
     def __init__(self, name='logger', logging_level=logging.INFO, level_formats={}, datefmt=None, console=True, handlers=[], *args, **kwargs):
         '''Initiates MpLogger service
@@ -214,6 +223,10 @@ class BaseLogger(object):
         # create the logger to use.
         logger = logging.getLogger(name)
         logger.propagate = False
+        
+        defaults = deepcopy(BaseLogger.logger_info_defaults)
+        defaults.update(logger_info)
+        logger_info = defaults
         # The only handler desired is the SubProcessLogHandler.  If any others
         # exist, remove them. In this case, on Unix and Linux the StreamHandler
         # will be inherited.
