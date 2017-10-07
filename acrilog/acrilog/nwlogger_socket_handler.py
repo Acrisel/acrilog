@@ -130,7 +130,6 @@ class NwLoggerClientHandler(logging.Handler):
         
     def close(self):
         self.sshpipe.close()
-        self.sshpipe.join()
         super(NwLoggerClientHandler, self).close()
         
 def cmdargs():
