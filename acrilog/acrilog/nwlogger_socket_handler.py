@@ -63,7 +63,7 @@ def start_nwlogger_client(**logger_info):
     active = True
     while active:
         msg, error = data_queue.get()
-        active = msg not in ['TREM', 'STOP', 'FINISH'] # msg == sshutil.EXIT_MESSAGE
+        active = msg not in ['TERM', 'STOP', 'FINISH'] # msg == sshutil.EXIT_MESSAGE
         if active:
             logger.handler(msg)
             
