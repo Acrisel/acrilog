@@ -6,5 +6,3 @@ encoding//acrilog/nwlogger_logging_server.py=utf-8
 encoding//acrilog/nwlogger_socket_server.py=utf-8
 encoding//acrilog/timed_sized_logging_handler.py=utf-8
 encoding//concepts/__init__.py=utf-8
-encoding//example/mplogger.py=utf-8
-encoding//example/timed_sized_log_handler.py=utf-8
