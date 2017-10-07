@@ -17,7 +17,7 @@ def main():
         'logging_level': 10,
         }
     handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris',)
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
     
     logger.info('How quickly daft jumping zebras vex.')
