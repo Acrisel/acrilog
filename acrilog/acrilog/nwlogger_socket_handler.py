@@ -94,6 +94,7 @@ class NwLoggerClientHandler(logging.Handler):
                   #"--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
                   "--logging-level": logger_info['logging_level'],
+                  "--server-host": logger_info['server_host'],
                   "--logdir": logdir,
                   }
         command.extend(["{} {}".format(name, value) for name, value in kwargs.items()])
@@ -150,6 +151,8 @@ def cmdargs():
                         help="""Port to forward messages to.""")
     parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
                         help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
+    parser.add_argument('--server-host', type=str, dest='server_host',
+                        help="""Logger server host name.""")
     parser.add_argument('--logdir', type=str, default='/tmp',
                         help="""Logdir to use, defaults to /tmp.""")
     args = parser.parse_args()  
