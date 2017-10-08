@@ -30,7 +30,9 @@ from copy import deepcopy
 #from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
 from acrilog.baselogger import LoggerAddHostFilter
 
+
 module_logger = logging.getLogger(__name__)
+
 
 def logger_process_lambda(logger_info):
     logger_info = deepcopy(logger_info)
@@ -41,7 +43,9 @@ def logger_process_lambda(logger_info):
         return logger
     return internal
 
+
 class NwLoggerHandlerError(Exception): pass
+
 
 def start_nwlogger_client(**logger_info):
     logger = NwLogger.get_logger(logger_info)
@@ -68,6 +72,7 @@ def start_nwlogger_client(**logger_info):
             logger.handler(msg)
             
     logger.debug('Remote logger pipe listener deactivated.')
+ 
  
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
@@ -133,7 +138,8 @@ class NwLoggerClientHandler(logging.Handler):
             raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
     def close(self):
-        self.sshpipe.close()
+        if self.sshpipe.is_alive():
+            self.sshpipe.close()
         super(NwLoggerClientHandler, self).close()
         
 def cmdargs():
