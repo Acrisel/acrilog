@@ -25,13 +25,14 @@ def main(port):
     handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris', logger=module_logger)
     logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
+    logger.setLevel(logging.DEBUG)
     
     logger.info('How quickly daft jumping zebras vex.')
     logger.warning('Jail zesty vixen who grabbed pay from quack.')
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
     
-    #handler.close()
+    handler.close()
     
 def cmdargs():
     import argparse
