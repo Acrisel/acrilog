@@ -128,6 +128,7 @@ class BaseLogger(object):
                 'default': "[ %(asctime)-15s ][ %(host)s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ]",
                 },
          'datefmt': '%Y-%m-%d,%H:%M:%S.%f',
+         'handler_kwargs': kwargs_defaults,
             }
     
     def __init__(self, name='logger', logging_level=logging.INFO, level_formats={}, datefmt=None, console=True, handlers=[], *args, **kwargs):
