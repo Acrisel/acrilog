@@ -16,19 +16,34 @@ if config_file.startswith('/private'):
     config_file = config_file[8:]
           
                     
-def main():
+def main(port=None):
     #logging_config = config.get('LOGGING')
-    nwlogger = NwLogger('example', logging_level=logging.DEBUG, console=True, consolidate=True, port=49740, logdir='/tmp')
+    nwlogger = NwLogger('example', logging_level=logging.DEBUG, console=True, consolidate=True, port=port, logdir='/tmp')
     nwlogger.start()
     
     print("Logger host, port: {}, {}".format(nwlogger.host, nwlogger.port))
     
-    time.sleep(60)
+    while True:
+        time.sleep(1)
     
     nwlogger.stop()
+
+def cmdargs():
+    import argparse
+    
+    filename = os.path.basename(__file__)
+    progname = filename.rpartition('.')[0]
+    
+    parser = argparse.ArgumentParser(description="%s runs SSH logging client example" % progname)
+    parser.add_argument('-p', '--port', type=int, required=False, #default=49740,
+                        help="""Port for logging server.""")
+    args = parser.parse_args()  
+    
+    return args
 
     
 if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')
-    main()
+    args = cmdargs()
+    main(**vars(args))
