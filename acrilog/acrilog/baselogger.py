@@ -224,6 +224,7 @@ class BaseLogger(object):
         logger = logging.getLogger(name)
         logger.propagate = False
         
+        # TODO: CHANGE TO USE MergedChainedDict
         defaults = deepcopy(BaseLogger.logger_info_defaults)
         defaults.update(logger_info)
         logger_info = defaults
