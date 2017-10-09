@@ -49,8 +49,9 @@ def logger_process_lambda(logger_info):
 class NwLoggerHandlerError(Exception): pass
 
 
-def start_nwlogger_client(log_info, **nw_log_info):
-    nwlogger = NwLogger.get_logger(nw_log_info)
+def start_nwlogger_client(log_info,): # **nw_log_info):
+    #nwlogger = NwLogger.get_logger(nw_log_info)
+    nwlogger = NwLogger.get_logger(log_info)
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
@@ -111,7 +112,7 @@ class NwLoggerClientHandler(logging.Handler):
         #server_host = logger_info['server_host']
         kwargs = {"--name": logger_info['name'],
                   #"--host": server_host, #logger_info['host'],
-                  "--port": logger_info['port'],
+                  #"--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
                   #"--logging-level": logger_info['logging_level'],
                   #"--server-host": logger_info['server_host'],
@@ -166,8 +167,8 @@ def cmdargs():
                         help="""Logger name.""")
     #parser.add_argument('--host', type=str, 
     #                    help="""Host to forward messages to (localhost).""")
-    parser.add_argument('--port', type=int, 
-                        help="""Port to forward messages to.""")
+    #parser.add_argument('--port', type=int, 
+    #                    help="""Port to forward messages to.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
                         help="""MpLogger info to using remote client.""")
     #parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
