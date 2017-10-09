@@ -95,12 +95,13 @@ class NwLoggerClientHandler(logging.Handler):
         global module_logger
         super(NwLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
+        self.sshpipe = None
         
         mp_logger_params = deepcopy(logger_info)
         mp_logger_params['name'] += '_nwlogger_client_handler'
         mp_logger = MpLogger(**mp_logger_params)
         mp_logger.start()
-        mp_logger_info = module_logger.get_info()
+        mp_logger_info = mp_logger.get_info()
         module_logger = mp_logger.get_logger(mp_logger_info, name=mp_logger_params['name'])
         
         self.addFilter(LoggerAddHostFilter())
