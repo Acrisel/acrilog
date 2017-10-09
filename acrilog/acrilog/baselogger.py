@@ -208,7 +208,20 @@ class BaseLogger(object):
         global_handlers = get_file_handler(formatter=record_formatter, **kwargs)
         
         for handler in global_handlers:
-            logger.addHandler(handler)  
+            logger.addHandler(handler) 
+            
+    @classmethod
+    def base_info(cls, log_info):
+        keys = [
+            'name',
+            'logging_level',
+            'level_formats',
+            'datefmt',
+            'handler_kwargs',
+            'server_host',
+            ]
+        result = dict([(k,log_info[k]) for k in keys])
+        return result
             
     def logger_info(self):
         hostname = socket.gethostbyname(socket.gethostname())
