@@ -65,7 +65,8 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     return handlers
 
 
-def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
+#def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
+def get_file_handler(logdir='', process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
     '''
     
     Args:
@@ -179,14 +180,16 @@ class BaseLogger(object):
         
     def global_file_handlers(self,):
         #if not process_key: process_key=self.name
-        handlers = get_file_handler(logging_level=self.logging_level, formatter=self.record_formatter, **self.kwargs)
+        #handlers = get_file_handler(logging_level=self.logging_level, formatter=self.record_formatter, **self.kwargs)
+        handlers = get_file_handler(formatter=self.record_formatter, **self.kwargs)
         self.global_filename = handlers[0].filename
         return handlers
         #for handler in handlers:
         #    self.queue_listener.addHandler(handler)  
             
+    #def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, **kwargs):
     @classmethod
-    def add_file_handlers(cls, name, logger, logdir, logging_level,  record_formatter, **kwargs):
+    def add_file_handlers(cls, logger,  record_formatter, **kwargs):
         '''
         Args:
             kwargs:
@@ -201,7 +204,8 @@ class BaseLogger(object):
                 atTime=None
         '''
         #if not process_key: process_key=name
-        global_handlers = get_file_handler(logging_level=logging_level, formatter=record_formatter, **kwargs)
+        #global_handlers = get_file_handler(logging_level=logging_level, formatter=record_formatter, **kwargs)
+        global_handlers = get_file_handler(formatter=record_formatter, **kwargs)
         
         for handler in global_handlers:
             logger.addHandler(handler)  
@@ -256,7 +260,7 @@ class BaseLogger(object):
                                   #process_key=logger_info['process_key'], 
                                   logger=logger,
                                   #logdir=logger_info['logdir'], 
-                                  logging_level=logging_level,
+                                  #logging_level=logging_level,
                                   record_formatter=LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt),
                                   **logger_info['handler_kwargs'],
                                   )
