@@ -51,7 +51,10 @@ class NwLoggerHandlerError(Exception): pass
 
 def start_nwlogger_client(**log_info): # **nw_log_info):
     #nwlogger = NwLogger.get_logger(nw_log_info)
-    log_info = yaml.load(log_info)
+    try:
+        log_info = yaml.load(log_info)
+    except Exception as e:
+        raise Exception("Faild to YAML.load('{}')".format(log_info)) from e
     nwlogger = NwLogger.get_logger(log_info)
     data_queue = mp.Queue()
     listener_started = mp.Event()
