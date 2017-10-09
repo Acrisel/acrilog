@@ -54,7 +54,7 @@ def start_nwlogger_client(log_info, **nw_log_info):
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
-    log_info = yaml.load(yaml.dump(log_info))
+    log_info = yaml.load(log_info)
     module_logger = MpLogger.get_logger(log_info, )
     
     kwargs = {
@@ -103,7 +103,7 @@ class NwLoggerClientHandler(logging.Handler):
         mp_logger = MpLogger(**mp_logger_params)
         mp_logger.start()
         mp_logger_info = mp_logger.logger_info()
-        module_logger = mp_logger.get_logger(mp_logger_info, name=mp_logger_params['name'])
+        module_logger = mp_logger.get_logger(mp_logger_info,)
         
         self.addFilter(LoggerAddHostFilter())
         

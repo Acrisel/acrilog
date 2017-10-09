@@ -241,19 +241,19 @@ class BaseLogger(object):
         #    # just a check for my sanity
         #    assert not isinstance(handler, TimedSizedRotatingHandler)
         #    logger.removeHandler(handler)
-        server_host = socket.gethostbyname(socket.gethostname())
+        this_host = socket.gethostbyname(socket.gethostname())
         
         # server may already started logger
         # if logger_info['server_host'] == server_host: return logger
         
-        logging_level = logger_info['logging_level']
+        #logging_level = logger_info['logging_level']
         #loggerq=logger_info['loggerq']
         #queue_handler = QueueHandler(loggerq)
         #logger.addHandler(queue_handler)
 
         # add the handler only if processing locally and this host is not server host.
         
-        if logger_info['server_host'] != server_host:
+        if logger_info['server_host'] != this_host:
             level_formats = logger_info['level_formats']
             datefmt = logger_info['datefmt']
             cls.add_file_handlers(name=name, 
