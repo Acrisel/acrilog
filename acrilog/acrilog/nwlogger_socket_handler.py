@@ -49,18 +49,18 @@ def logger_process_lambda(logger_info):
 class NwLoggerHandlerError(Exception): pass
 
 
-def start_nwlogger_client(logger_info, **nw_logger_info):
-    nwlogger = NwLogger.get_logger(nw_logger_info)
+def start_nwlogger_client(log_info, **nw_log_info):
+    nwlogger = NwLogger.get_logger(nw_log_info)
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
-    logger_info = yaml.load(yaml.dump(logger_info))
-    module_logger = MpLogger.get_logger(logger_info, )
+    log_info = yaml.load(yaml.dump(log_info))
+    module_logger = MpLogger.get_logger(log_info, )
     
     kwargs = {
         'message_queue': data_queue,
         'started_event': listener_started,
-        'logger_info': logger_info,
+        'logger_info': log_info,
         }
     
     listener = mp.Process(target=sshutil.pipe_listener_forever, kwargs=kwargs, daemon=False)
@@ -168,7 +168,7 @@ def cmdargs():
     parser.add_argument('--port', type=int, 
                         help="""Port to forward messages to.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
-                        help="""MpLogger info to use ing remote client.""")
+                        help="""MpLogger info to using remote client.""")
     #parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
     #                    help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
     #parser.add_argument('--server-host', type=str, dest='server_host',
