@@ -49,7 +49,7 @@ def logger_process_lambda(logger_info):
 class NwLoggerHandlerError(Exception): pass
 
 
-def start_nwlogger_client(**log_info): # **nw_log_info):
+def start_nwlogger_client(log_info): # **nw_log_info):
     #nwlogger = NwLogger.get_logger(nw_log_info)
     try:
         log_info = yaml.load(log_info)
