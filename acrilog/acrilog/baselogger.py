@@ -246,7 +246,6 @@ class BaseLogger(object):
         # server may already started logger
         # if logger_info['server_host'] == server_host: return logger
         
-        #logging_level = logger_info['logging_level']
         #loggerq=logger_info['loggerq']
         #queue_handler = QueueHandler(loggerq)
         #logger.addHandler(queue_handler)
@@ -268,6 +267,7 @@ class BaseLogger(object):
         # On Windows, the level will not be inherited.  Also, we could just
         # set the level to log everything here and filter it in the main
         # process handlers.  For now, just set it from the global default.
+        logging_level = logger_info['logging_level']
         logger.setLevel(logging_level)     
         return logger
 
