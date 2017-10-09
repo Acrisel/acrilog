@@ -204,7 +204,10 @@ class MpLogger(BaseLogger):
             #logging_root: defaults to name if not provided
             encoding: used in defining file handlers; default 'ascii'
             handlers: list of global handlers 
-            kwargs: pass-through to handler defining its policy
+            kwargs: pass-through to hierarchical handler defining its policy
+                key='name' 
+                separator='.'
+                consolidate=''
                 file_mode='a', 
                 file_prefix='',
                 file_suffix='',
@@ -234,7 +237,8 @@ class MpLogger(BaseLogger):
         return info
             
     @classmethod
-    def get_logger(cls, logger_info, name):
+    def get_logger(cls, logger_info, name=None):
+        name = name if name is not None else logger_info['name']
         # create the logger to use.
         logger = BaseLogger.get_logger(logger_info, name)
         logger.addFilter(LoggerAddHostFilter())

@@ -29,6 +29,8 @@ import logging
 from copy import deepcopy
 #from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
 from acrilog.baselogger import LoggerAddHostFilter
+from acrilog.mplogger import MpLogger
+import yaml
 
 
 module_logger = logging.getLogger(__name__)
@@ -47,31 +49,34 @@ def logger_process_lambda(logger_info):
 class NwLoggerHandlerError(Exception): pass
 
 
-def start_nwlogger_client(**logger_info):
-    logger = NwLogger.get_logger(logger_info)
+def start_nwlogger_client(logger_info, **nw_logger_info):
+    nwlogger = NwLogger.get_logger(nw_logger_info)
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
+    module_logger = MpLogger.get_logger(logger_info, )
+    
     kwargs = {
-        'queue': data_queue,
+        'message_queue': data_queue,
         'started_event': listener_started,
+        'logger_info': logger_info,
         }
     
     listener = mp.Process(target=sshutil.pipe_listener_forever, kwargs=kwargs, daemon=False)
     listener.start()
     
-    logger.debug('Waiting for Remote logger pipe listener to start.')
+    module_logger.debug('Waiting for Remote logger pipe listener to start.')
     listener_started.wait()
-    logger.debug('Remote logger pipe listener started.')
+    module_logger.debug('Remote logger pipe listener started.')
     
     active = True
     while active:
         msg, error = data_queue.get()
         active = msg not in ['TERM', 'STOP', 'FINISH'] # msg == sshutil.EXIT_MESSAGE
         if active:
-            logger.handler(msg)
+            nwlogger.handler(msg)
             
-    logger.debug('Remote logger pipe listener deactivated.')
+    module_logger.debug('Remote logger pipe listener deactivated.')
  
  
 class NwLoggerClientHandler(logging.Handler):
@@ -80,16 +85,23 @@ class NwLoggerClientHandler(logging.Handler):
     NwLoggerClientHandler create handler object that sends 
     '''
     
-    def __init__(self, logger_info, ssh_host, logger=None, logdir='/tmp'):
+    def __init__(self, logger_info, ssh_host,): # logger=None, logdir='/tmp'):
         ''' Initiate logger client on remote connecting to host:port
         
         Args:
             logger_info: result of NwLogger.logger_info().
             ssh_host: SSH config Host to connect to.
         '''
+        global module_logger
         super(NwLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
-        #self.local = local
+        
+        mp_logger_params = deepcopy(logger_info)
+        mp_logger_params['name'] += '_nwlogger_client_handler'
+        mp_logger = MpLogger(**mp_logger_params)
+        mp_logger.start()
+        mp_logger_info = module_logger.get_info()
+        module_logger = mp_logger.get_logger(mp_logger_info, name=mp_logger_params['name'])
         
         self.addFilter(LoggerAddHostFilter())
         
@@ -98,23 +110,21 @@ class NwLoggerClientHandler(logging.Handler):
         kwargs = {"--name": logger_info['name'],
                   #"--host": server_host, #logger_info['host'],
                   "--port": logger_info['port'],
-                  "--logging-level": logger_info['logging_level'],
-                  "--server-host": logger_info['server_host'],
-                  "--logdir": logdir,
+                  '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
+                  #"--logging-level": logger_info['logging_level'],
+                  #"--server-host": logger_info['server_host'],
+                  #"--logdir": logdir,
                   }
         command.extend(["{} {}".format(name, value) for name, value in kwargs.items()])
         command = ' '.join(command)
         #print('running SSHPipe:', ssh_host, command)
         
         logname = '{}.sshpipe.log'.format(logger_info['name'])
-        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=logger) # get_logger=logger_process_lambda(NwLogger, self.logger_info))
-        self.logger = logger
-        if logger:
-            logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
+        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=module_logger) # get_logger=logger_process_lambda(NwLogger, self.logger_info))
+        module_logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
         self.sshpipe.start()
         
-        if logger:
-            logger.debug("Remote logger SSHPipe started.")
+        module_logger.debug("Remote logger SSHPipe started.")
             
     def __logger_process_lambda(self,):
         logger_info = deepcopy(self.logger_info)
@@ -155,6 +165,8 @@ def cmdargs():
     #                    help="""Host to forward messages to (localhost).""")
     parser.add_argument('--port', type=int, 
                         help="""Port to forward messages to.""")
+    parser.add_argument('--log-info', type=str, dest='log_info',
+                        help="""MpLogger info to use ing remote client.""")
     parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
                         help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
     parser.add_argument('--server-host', type=str, dest='server_host',

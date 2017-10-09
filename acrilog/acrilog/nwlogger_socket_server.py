@@ -30,7 +30,7 @@ import threading as th
 from acrilog.baselogger import BaseLogger, create_stream_handler, LoggerAddHostFilter
 from acrilog.utils import get_free_port, get_hostname, get_ip_address
 from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
-import sshutil
+
 
 # TODO: get USE_QUEUE = True working without warnings at the end.
 USE_QUEUE = False
@@ -105,8 +105,7 @@ def get_log_record_tcp_request_handler(logger_queue=None, name=None):
         """
             
         def handle(self):
-            """
-            Handle multiple requests - each expected to be a 4-byte length,
+            """Handles multiple requests - each expected to be a 4-byte length,
             followed by the LogRecord in pickle format. Logs the record
             according to whatever policy is configured locally.
             """

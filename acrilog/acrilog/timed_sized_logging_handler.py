@@ -108,15 +108,18 @@ def get_file_handler(logdir='', name=None, formatter=None, file_prefix=None, fil
     return result
 
 class HierarchicalTimedSizedRotatingHandler(Handler):
-    def __init__(self, key='name', separator='.', consolidate=False, *args, **kwargs):
-        ''' Maintains TimedSizedRotatingHandler handlers according to hierarchy
+    def __init__(self, key='name', separator='.', consolidate='', *args, **kwargs):
+        ''' Maintains TimedSizedRotatingHandler handlers according to hierarchy.
+        
+        LogRecord key will be used to store and fetch handlers.
+        If there is separator, value of LogRecord key will be split from the right generating multiple values.
+        E.g., A.B.C value with be translated to hierarchical values of A, A.B, and A.B.C.
+        Note, it is important that LogRecord key values will not include separator characters.
         
         Args:
             key: name of LogRecord attributes to use to associate handlers.
-            separator: is used to split key to hierarchy.
-            consolidate: causes records to go to upper level handlers.  I.e.,
-                if record.name is A.B.C, and consolidate is set, record will
-                be added to A.B.C, A.B, and A
+            separator: is used to split key to hierarchy. If None, key value will not be broken to parts.
+            consolidate: name to which records will be consolidated into.
             
             kwargs: 
                 logdir='', 
@@ -136,7 +139,7 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
                 utc=False, 
                 atTime=None
         '''
-        super(HierarchicalTimedSizedRotatingHandler, self).__init__() #*args, **kwargs)
+        super(HierarchicalTimedSizedRotatingHandler, self).__init__() 
 
         self.separator = separator
         self.key = key
@@ -166,7 +169,8 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
         #print('record_key[processName]: %s' %(repr(record.__dict__)))
         
         keys = [record_key]
-        if self.consolidate:
+        if self.consolidate: keys.append(self.consolidate)
+        if self.separator is not None:
             keys = []
             left_key = record_key
             while left_key:
@@ -179,7 +183,7 @@ class HierarchicalTimedSizedRotatingHandler(Handler):
             #if record_key: 
             #process_handlers = self.handlers[process_key]
             key_handlers = self.__handlers.get(record_key,)
-            # avoid getting dedicated handler in special case when in consolidated mode and record with 
+            # avoid getting dedicated handler when in consolidated mode and record with 
             # name equal to the global.
             need_handler = key_handlers is None or record_key != self.name 
             if need_handler:
