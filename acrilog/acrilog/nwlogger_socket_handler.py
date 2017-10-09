@@ -61,12 +61,15 @@ def start_nwlogger_client(log_info): # **nw_log_info):
     listener_started = mp.Event()
     
     base_log_info = MpLogger.base_info(log_info)
-    module_logger = MpLogger(**base_log_info)
+    mplogger = MpLogger(**base_log_info)
+    mplogger.start()
+    
+    module_logger = MpLogger.get_logger(mplogger.logger_info())
     
     kwargs = {
         'message_queue': data_queue,
         'started_event': listener_started,
-        'logger_info': log_info,
+        'logger_info': mplogger.logger_info(),
         }
     
     listener = mp.Process(target=sshutil.pipe_listener_forever, kwargs=kwargs, daemon=False)
