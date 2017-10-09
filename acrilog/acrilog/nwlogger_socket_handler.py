@@ -150,8 +150,9 @@ class NwLoggerClientHandler(logging.Handler):
             raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
     def close(self):
-        if self.sshpipe.is_alive():
-            self.sshpipe.close()
+        if self.sshpipe:
+            if self.sshpipe.is_alive():
+                self.sshpipe.close()
         super(NwLoggerClientHandler, self).close()
         
 def cmdargs():
