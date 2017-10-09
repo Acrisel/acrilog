@@ -54,6 +54,7 @@ def start_nwlogger_client(logger_info, **nw_logger_info):
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
+    logger_info = yaml.load(yaml.dump(logger_info))
     module_logger = MpLogger.get_logger(logger_info, )
     
     kwargs = {
@@ -168,12 +169,12 @@ def cmdargs():
                         help="""Port to forward messages to.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
                         help="""MpLogger info to use ing remote client.""")
-    parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
-                        help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
-    parser.add_argument('--server-host', type=str, dest='server_host',
-                        help="""Logger server host name.""")
-    parser.add_argument('--logdir', type=str, default='/tmp',
-                        help="""Logdir to use, defaults to /tmp.""")
+    #parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
+    #                    help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
+    #parser.add_argument('--server-host', type=str, dest='server_host',
+    #                    help="""Logger server host name.""")
+    #parser.add_argument('--logdir', type=str, default='/tmp',
+    #                    help="""Logdir to use, defaults to /tmp.""")
     args = parser.parse_args()  
     
     return args
