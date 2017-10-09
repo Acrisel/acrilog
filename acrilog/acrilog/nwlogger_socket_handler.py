@@ -108,6 +108,10 @@ class NwLoggerClientHandler(logging.Handler):
         
         self.addFilter(LoggerAddHostFilter())
         
+        # there is no need to pass loggerq via ssh.  
+        # alos, it wont work anyhow.
+        del mp_logger_info['loggerq']
+        
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']
         kwargs = {#"--name": logger_info['name'],
