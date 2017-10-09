@@ -101,7 +101,7 @@ class NwLoggerClientHandler(logging.Handler):
         mp_logger_params['name'] += '_nwlogger_client_handler'
         mp_logger = MpLogger(**mp_logger_params)
         mp_logger.start()
-        mp_logger_info = mp_logger.get_info()
+        mp_logger_info = mp_logger.logger_info()
         module_logger = mp_logger.get_logger(mp_logger_info, name=mp_logger_params['name'])
         
         self.addFilter(LoggerAddHostFilter())
