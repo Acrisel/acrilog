@@ -49,7 +49,7 @@ def logger_process_lambda(logger_info):
 class NwLoggerHandlerError(Exception): pass
 
 
-def start_nwlogger_client(log_info,): # **nw_log_info):
+def start_nwlogger_client(**log_info): # **nw_log_info):
     #nwlogger = NwLogger.get_logger(nw_log_info)
     log_info = yaml.load(log_info)
     nwlogger = NwLogger.get_logger(log_info)
@@ -100,6 +100,7 @@ class NwLoggerClientHandler(logging.Handler):
         self.sshpipe = None
         
         mp_logger_params = deepcopy(logger_info)
+        del mp_logger_params['port']
         mp_logger_params['name'] += '_nwlogger_client_handler'
         mp_logger = MpLogger(**mp_logger_params)
         mp_logger.start()
@@ -110,7 +111,9 @@ class NwLoggerClientHandler(logging.Handler):
         
         # there is no need to pass loggerq via ssh.  
         # alos, it wont work anyhow.
+        # but it does need port
         del mp_logger_info['loggerq']
+        mp_logger_info['port'] = logger_info['port']
         
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']
