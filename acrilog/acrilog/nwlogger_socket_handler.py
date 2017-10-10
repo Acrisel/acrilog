@@ -61,7 +61,9 @@ def start_nwlogger_client(log_info): # **nw_log_info):
     listener_started = mp.Event()
     
     base_log_info = MpLogger.base_info(log_info)
-    mplogger = MpLogger(**base_log_info,console=False)
+    del base_log_info['handler_kwargs']
+    handler_kwargs = log_info['handler_kwargs']
+    mplogger = MpLogger(**base_log_info, **handler_kwargs, console=False)
     mplogger.start()
     
     module_logger = MpLogger.get_logger(mplogger.logger_info())
