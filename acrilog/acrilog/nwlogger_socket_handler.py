@@ -168,6 +168,9 @@ class NwLoggerClientHandler(logging.Handler):
         except Exception as e:
             raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
+    def __del__(self):
+        self.close()
+        
     def close(self):
         if self.mp_logger:
             self.mp_logger.stop()

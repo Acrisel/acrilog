@@ -36,7 +36,6 @@ def main(port):
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
     
-    logger.stop()
     
 def cmdargs():
     import argparse
