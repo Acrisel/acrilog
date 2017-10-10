@@ -90,7 +90,8 @@ def start_nwlogger_client(log_info): # **nw_log_info):
             
     module_logger.debug('Remote logger pipe listener deactivated.')
  
- 
+    mplogger.stop()
+    
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
     
@@ -169,7 +170,7 @@ class NwLoggerClientHandler(logging.Handler):
         
     def close(self):
         if self.mp_logger:
-            self.mp_logger.close()
+            self.mp_logger.stop()
         if self.sshpipe:
             if self.sshpipe.is_alive():
                 self.sshpipe.close()
