@@ -23,6 +23,7 @@ def main(port):
         'logging_level': logging.DEBUG,
         'server_host': 'arnon-mbp',
         }
+    
     handler = NwLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris') #, logger=module_logger)
     logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
@@ -35,7 +36,7 @@ def main(port):
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
     
-    logger.close()
+    logger.stop()
     
 def cmdargs():
     import argparse
