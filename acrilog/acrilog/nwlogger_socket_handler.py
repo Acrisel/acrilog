@@ -112,10 +112,10 @@ class NwLoggerClientHandler(logging.Handler):
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
         mp_logger_params['name'] += '_nwlogger_client_handler'
-        mp_logger = MpLogger(**mp_logger_params)
-        mp_logger.start()
-        mp_logger_info = mp_logger.logger_info()
-        module_logger = mp_logger.get_logger(mp_logger_info,)
+        self.mp_logger = MpLogger(**mp_logger_params)
+        self.mp_logger.start()
+        mp_logger_info = self.mp_logger.logger_info()
+        module_logger = MpLogger.get_logger(mp_logger_info,)
         
         self.addFilter(LoggerAddHostFilter())
         
@@ -168,6 +168,8 @@ class NwLoggerClientHandler(logging.Handler):
             raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
         
     def close(self):
+        if self.mp_logger:
+            self.mp_logger.close()
         if self.sshpipe:
             if self.sshpipe.is_alive():
                 self.sshpipe.close()

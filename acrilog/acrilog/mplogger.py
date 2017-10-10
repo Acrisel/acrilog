@@ -309,6 +309,7 @@ class MpLogger(BaseLogger):
                 self.logger_proc.join()
         #print('Stopped logger.')
         
+        
     '''    
     def stop(self,):
         if self.queue_listener:

@@ -24,7 +24,7 @@ def main(port=None):
     print("Logger host, port: {}, {}".format(nwlogger.host, nwlogger.port))
     
     while True:
-        time.sleep(1)
+        time.sleep(0.5)
     
     nwlogger.stop()
 
