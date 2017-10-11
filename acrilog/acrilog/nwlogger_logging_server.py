@@ -27,9 +27,8 @@ import socketserver
 import struct
 import multiprocessing as mp
 import threading as th
-from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
-from acrilog.utils import get_free_port
-from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
+from acrilog.baselogger import BaseLogger, create_stream_handler
+from acrilib import get_free_port, HierarchicalTimedSizedRotatingHandler
 import os
 
 class AcrilogError(Exception):

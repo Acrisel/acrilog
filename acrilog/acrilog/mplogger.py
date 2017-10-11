@@ -24,8 +24,7 @@ import logging
 from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
 from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
-from acrilog.formatters import LoggerAddHostFilter
-from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
+from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
 
 
 class LogRecordQueueListener_delete(QueueListener):

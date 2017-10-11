@@ -28,7 +28,7 @@ import sshutil
 import logging
 from copy import deepcopy
 #from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
-from acrilog.formatters import LoggerAddHostFilter
+from acrilib import LoggerAddHostFilter
 from acrilog.mplogger import MpLogger
 import yaml
 
