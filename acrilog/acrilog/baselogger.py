@@ -25,30 +25,14 @@ from logging.handlers import QueueListener, QueueHandler
 import os
 import multiprocessing as mp
 from copy import copy
-from acrilog.timed_sized_logging_handler import TimedSizedRotatingHandler
+from acrilib import TimedSizedRotatingHandler
 from datetime import datetime
 import sys   
 import socket
 import traceback
-from acrilog.formatters import LevelBasedFormatter
-from acrilog.utils import get_hostname, get_ip_address
-from copy import deepcopy
+from acrilib import LevelBasedFormatter, LoggerAddHostFilter
+from copy import deepcopy 
      
-     
-class LoggerAddHostFilter(logging.Filter):
-    """
-    This is filter adds host information to LogRecord.
-    """
-
-    #USERS = ['jim', 'fred', 'sheila']
-    #IPS = ['123.231.231.123', '127.0.0.1', '192.168.0.1']
-
-    def filter(self, record):
-
-        if not hasattr(record, 'host'):
-            record.host = get_hostname()
-            record.ip = get_ip_address()
-        return True
 
     
 def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=None):
@@ -162,9 +146,9 @@ class BaseLogger(object):
         '''
                     
         self.logging_level = logging_level
-        self.level_formats = level_formats
-        self.datefmt = datefmt
-        self.record_formatter = LevelBasedFormatter(level_formats=level_formats, datefmt=datefmt)
+        self.level_formats = level_formats if level_formats else BaseLogger.logger_info_defaults['level_formats']
+        self.datefmt = datefmt if datefmt else BaseLogger.logger_info_defaults['datefmt']
+        self.record_formatter = LevelBasedFormatter(level_formats=self.level_formats, datefmt=self.datefmt)
         self.logger_initialized = False
         self.handlers = handlers
         #self.process_key = process_key

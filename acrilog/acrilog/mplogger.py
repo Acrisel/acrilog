@@ -23,7 +23,8 @@
 import logging
 from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
-from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler, LoggerAddHostFilter
+from acrilog.baselogger import BaseLogger, get_file_handler, create_stream_handler
+from acrilog.formatters import LoggerAddHostFilter
 from acrilog.timed_sized_logging_handler import HierarchicalTimedSizedRotatingHandler
 
 
@@ -282,7 +283,7 @@ class MpLogger(BaseLogger):
         self.finished = mp.Event()
         
         start_nwlogger_kwargs = {
-            'name': self.name, 
+            'name': self.name if not name else name, 
             'loggerq': self.loggerq, 
             'logging_level': self.logging_level, 
             'formatter': self.record_formatter, 

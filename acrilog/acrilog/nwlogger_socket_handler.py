@@ -28,7 +28,7 @@ import sshutil
 import logging
 from copy import deepcopy
 #from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
-from acrilog.baselogger import LoggerAddHostFilter
+from acrilog.formatters import LoggerAddHostFilter
 from acrilog.mplogger import MpLogger
 import yaml
 
@@ -60,9 +60,10 @@ def start_nwlogger_client(log_info): # **nw_log_info):
     data_queue = mp.Queue()
     listener_started = mp.Event()
     
+    
+    handler_kwargs = log_info['handler_kwargs']
     base_log_info = MpLogger.base_info(log_info)
     del base_log_info['handler_kwargs']
-    handler_kwargs = log_info['handler_kwargs']
     mplogger = MpLogger(**base_log_info, **handler_kwargs, console=False)
     mplogger.start()
     

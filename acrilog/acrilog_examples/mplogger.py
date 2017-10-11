@@ -43,8 +43,6 @@ level_formats = {logging.DEBUG:"[ %(asctime)-26s ][ %(processName)-11s ][ %(leve
                 }
 
 logdir = os.getcwd()
-#mplogger=MpLogger(name='mplogger', logdir=logdir, logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f', 
-#                  process_key=['processName'], console=True, force_global=True)
 
 if __name__=='__main__':
     mp.freeze_support()
