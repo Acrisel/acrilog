@@ -50,7 +50,9 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         self.nwlogger = NwLogger.get_logger(log_info)
                     
     def handle(self, received):
-        self.nwlogger.handle(received)
+        # it may be "TERM" message or alike
+        if isinstance(received, logging.LogRecord):
+            self.nwlogger.handle(received)
 
             
 class NwLoggerClientHandler(logging.Handler):
