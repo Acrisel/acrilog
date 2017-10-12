@@ -156,7 +156,8 @@ class NwLoggerClientHandler(logging.Handler):
         
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']
-        kwargs = {#"--name": logger_info['name'],
+        logger_name = "{}_nwlogger_handler_{}_{}".format(logger_info['name'], logger_info['server_host'], os.getpid())
+        kwargs = {"--name": logger_name,
                   #"--host": server_host, #logger_info['host'],
                   #"--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
@@ -214,8 +215,8 @@ def cmdargs():
     progname = filename.rpartition('.')[0]
     
     parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
-    #parser.add_argument('--name', type=str, 
-    #                    help="""Logger name.""")
+    parser.add_argument('--name', type=str, 
+                        help="""Logger name.""")
     #parser.add_argument('--host', type=str, 
     #                    help="""Host to forward messages to (localhost).""")
     #parser.add_argument('--port', type=int, 
@@ -239,5 +240,5 @@ if __name__ == '__main__':
     
     args = cmdargs()
     #start_nwlogger_client(**vars(args))
-    client = LoggingSSHPipeHandler()
+    client = LoggingSSHPipeHandler(handler_id=args.name)
     client.service_loop()
