@@ -104,27 +104,6 @@ def find_meta(meta):
         return meta_match.group(1)
     raise RuntimeError("Unable to find __{meta}__ string.".format(meta=meta))
 
-'''
-setup(
-        name=NAME,
-        description=find_meta("description"),
-        license=find_meta("license"),
-        url=find_meta("uri"),
-        version=find_meta("version"),
-        author=find_meta("author"),
-        author_email=find_meta("email"),
-        maintainer=find_meta("author"),
-        maintainer_email=find_meta("email"),
-        keywords=KEYWORDS,
-        long_description=read("README.rst"),
-        packages=PACKAGES,
-        package_dir={"": "src"},
-        zip_safe=False,
-        classifiers=CLASSIFIERS,
-        install_requires=INSTALL_REQUIRES,
-    )
-'''
-
 setup_info={'name': NAME,
  'version': VERSION,
  'url': URL,
@@ -136,7 +115,7 @@ setup_info={'name': NAME,
  'keywords': 'library logger multiprocessing',
  'packages': packages,
  'scripts' : scripts,
- 'install_requires': [],
+ 'install_requires': ['acrilib>=3.0',],
  'extras_require': {'dev': [], 'test': []},
  'classifiers': ['Development Status :: 5 - Production/Stable',
                  'Environment :: Other Environment',
