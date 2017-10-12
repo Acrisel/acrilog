@@ -74,7 +74,7 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         self.nwlogger.handler(msg)
 
 
-
+'''
 def start_nwlogger_client(log_info): # **nw_log_info):
     #nwlogger = NwLogger.get_logger(nw_log_info)
     try:
@@ -118,7 +118,8 @@ def start_nwlogger_client(log_info): # **nw_log_info):
     module_logger.debug('Remote logger pipe listener deactivated.')
  
     mplogger.stop()
-    
+'''
+            
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
     
