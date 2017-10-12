@@ -50,7 +50,7 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         self.nwlogger = NwLogger.get_logger(log_info)
                     
     def handle(self, received):
-        self.nwlogger.handle(msg)
+        self.nwlogger.handle(received)
 
             
 class NwLoggerClientHandler(logging.Handler):
