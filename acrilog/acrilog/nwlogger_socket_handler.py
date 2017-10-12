@@ -31,6 +31,7 @@ from copy import deepcopy
 from acrilib import LoggerAddHostFilter
 from acrilog.mplogger import MpLogger
 import yaml
+from sshutil import SSHPipeHandler
 
 
 module_logger = logging.getLogger(__name__)
@@ -47,6 +48,31 @@ def logger_process_lambda(logger_info):
 
 
 class NwLoggerHandlerError(Exception): pass
+
+class LoggingSSHPipeHandler(SSHPipeHandler):
+    
+    def __init__(self, log_info=None, *args, **kwargs):
+        super(LoggingSSHPipeHandler, self).__init__(*args, **kwargs)
+        try:
+            log_info = yaml.load(log_info)
+        except Exception as e:
+            raise Exception("Faild to YAML.load('{}')".format(log_info)) from e
+        module_logger.debug('Accepted logging info:{}.'.format(log_info))
+        self.nwlogger = NwLogger.get_logger(log_info)
+                
+    #def atstart(self, receieved):
+    #    file = "{}{}".format(__file__, ".remote.log")
+    #    self.module_logger.debug("Openning file: {}.".format(file))
+    #    self.file = open(file, 'w')
+        
+    def atexit(self, received):
+        if self.file is not None:
+            self.file.close()
+        super(LoggingSSHPipeHandler, self).atexit(received)
+    
+    def handle(self, received):
+        self.nwlogger.handler(msg)
+
 
 
 def start_nwlogger_client(log_info): # **nw_log_info):
@@ -211,4 +237,6 @@ if __name__ == '__main__':
     mp.set_start_method('spawn')
     
     args = cmdargs()
-    start_nwlogger_client(**vars(args))
+    #start_nwlogger_client(**vars(args))
+    client = LoggingSSHPipeHandler()
+    client.service_loop()
