@@ -27,7 +27,6 @@ import os
 import sshutil
 import logging
 from copy import deepcopy
-#from acrilog.utils import get_hostname, get_ip_address #, logger_process_lambda
 from acrilib import LoggerAddHostFilter
 from acrilog.mplogger import MpLogger
 import yaml
@@ -35,16 +34,6 @@ from sshutil import SSHPipeHandler
 
 
 module_logger = logging.getLogger(__name__)
-
-
-def logger_process_lambda(logger_info):
-    logger_info = deepcopy(logger_info)
-    def internal(name=None):
-        if name is not None:
-            logger_info['name'] = name
-        logger = NwLogger.get_logger(logger_info)
-        return logger
-    return internal
 
 
 class NwLoggerHandlerError(Exception): pass
@@ -59,66 +48,10 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
             raise Exception("Faild to YAML.load('{}')".format(log_info)) from e
         module_logger.debug('Accepted logging info:{}.'.format(log_info))
         self.nwlogger = NwLogger.get_logger(log_info)
-                
-    #def atstart(self, receieved):
-    #    file = "{}{}".format(__file__, ".remote.log")
-    #    self.module_logger.debug("Openning file: {}.".format(file))
-    #    self.file = open(file, 'w')
-        
-    def atexit(self, received):
-        if self.file is not None:
-            self.file.close()
-        super(LoggingSSHPipeHandler, self).atexit(received)
-    
+                    
     def handle(self, received):
         self.nwlogger.handler(msg)
 
-
-'''
-def start_nwlogger_client(log_info): # **nw_log_info):
-    #nwlogger = NwLogger.get_logger(nw_log_info)
-    try:
-        log_info = yaml.load(log_info)
-    except Exception as e:
-        raise Exception("Faild to YAML.load('{}')".format(log_info)) from e
-    
-    nwlogger = NwLogger.get_logger(log_info)
-    data_queue = mp.Queue()
-    listener_started = mp.Event()
-    
-    
-    handler_kwargs = log_info['handler_kwargs']
-    base_log_info = MpLogger.base_info(log_info)
-    del base_log_info['handler_kwargs']
-    mplogger = MpLogger(**base_log_info, **handler_kwargs, console=False)
-    mplogger.start()
-    
-    module_logger = MpLogger.get_logger(mplogger.logger_info())
-    
-    kwargs = {
-        'message_queue': data_queue,
-        'started_event': listener_started,
-        'logger_info': mplogger.logger_info(),
-        }
-    
-    listener = mp.Process(target=sshutil.pipe_listener_forever, kwargs=kwargs, daemon=False)
-    listener.start()
-    
-    module_logger.debug('Waiting for Remote logger pipe listener to start.')
-    listener_started.wait()
-    module_logger.debug('Remote logger pipe listener started.')
-    
-    active = True
-    while active:
-        msg, error = data_queue.get()
-        active = msg not in ['TERM', 'STOP', 'FINISH'] # msg == sshutil.EXIT_MESSAGE
-        if active:
-            nwlogger.handler(msg)
-            
-    module_logger.debug('Remote logger pipe listener deactivated.')
- 
-    mplogger.stop()
-'''
             
 class NwLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
@@ -157,7 +90,7 @@ class NwLoggerClientHandler(logging.Handler):
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']
         logger_name = "{}_nwlogger_handler_{}_{}".format(logger_info['name'], logger_info['server_host'], os.getpid())
-        kwargs = {"--name": logger_name,
+        kwargs = {"--handler-id": logger_name,
                   #"--host": server_host, #logger_info['host'],
                   #"--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
@@ -170,22 +103,13 @@ class NwLoggerClientHandler(logging.Handler):
         #print('running SSHPipe:', ssh_host, command)
         
         logname = '{}.sshpipe'.format(logger_info['name'],)
-        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=module_logger) # get_logger=logger_process_lambda(NwLogger, self.logger_info))
+        self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=module_logger) 
         module_logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
         self.sshpipe.start()
         
         module_logger.debug("Remote logger SSHPipe started.")
             
-    def __logger_process_lambda(self,):
-        logger_info = deepcopy(self.logger_info)
-        def internal(self, name=None):
-            if name is not None:
-                logger_info['name'] = name
-            logger = NwLogger.get_logger(logger_info)
-            return logger
-        return internal
-        
-    def emit(self, record):
+     def emit(self, record):
         #if not hasattr(record, 'host'):
         #    record.host = get_hostname()
         #    record.ip = get_ip_address()if logger:
@@ -215,7 +139,7 @@ def cmdargs():
     progname = filename.rpartition('.')[0]
     
     parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
-    parser.add_argument('--name', type=str, 
+    parser.add_argument('--handler-id', type=str, dest="handler_id",
                         help="""Logger name.""")
     #parser.add_argument('--host', type=str, 
     #                    help="""Host to forward messages to (localhost).""")
@@ -240,5 +164,5 @@ if __name__ == '__main__':
     
     args = cmdargs()
     #start_nwlogger_client(**vars(args))
-    client = LoggingSSHPipeHandler(handler_id=args.name)
+    client = LoggingSSHPipeHandler(**vars(args))
     client.service_loop()
