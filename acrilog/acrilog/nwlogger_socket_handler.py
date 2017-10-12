@@ -112,12 +112,6 @@ class NwLoggerClientHandler(logging.Handler):
         module_logger.debug("Remote logger SSHPipe started.")
             
     def emit(self, record):
-        #if not hasattr(record, 'host'):
-        #    record.host = get_hostname()
-        #    record.ip = get_ip_address()if logger:
-        #logger = self.logger
-        #if logger:
-        #    logger.debug("Emitting logger record to pipe: {}".format(repr(record)))
         try:
             self.sshpipe.send(record)
         except Exception as e:
@@ -129,9 +123,9 @@ class NwLoggerClientHandler(logging.Handler):
     def close(self):
         if self.mp_logger:
             self.mp_logger.stop()
-        if self.sshpipe:
-            if self.sshpipe.is_alive():
-                self.sshpipe.close()
+        #if self.sshpipe:
+        if self.sshpipe.is_alive():
+            self.sshpipe.close()
         super(NwLoggerClientHandler, self).close()
         
 def cmdargs():
