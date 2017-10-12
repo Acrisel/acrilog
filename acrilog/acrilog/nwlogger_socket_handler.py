@@ -109,7 +109,7 @@ class NwLoggerClientHandler(logging.Handler):
         
         module_logger.debug("Remote logger SSHPipe started.")
             
-     def emit(self, record):
+    def emit(self, record):
         #if not hasattr(record, 'host'):
         #    record.host = get_hostname()
         #    record.ip = get_ip_address()if logger:
