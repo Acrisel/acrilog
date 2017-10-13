@@ -124,6 +124,7 @@ class NwLoggerClientHandler(logging.Handler):
             sshagent.join()
             response = sshagent.response()
             raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(host, response)) 
+        
         module_logger.debug("Remote logger SSHPipe started.")
             
     def emit(self, record):
