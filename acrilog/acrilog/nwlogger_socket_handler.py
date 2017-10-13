@@ -77,7 +77,10 @@ class NwLoggerClientHandler(logging.Handler):
         del mp_logger_params['port']
         mp_logger_params['name'] += '_nwlogger_client_handler'
         handler_kwargs = mp_logger_params['handler_kwargs']
-        self.mp_logger = MpLogger(**mp_logger_params, **handler_kwargs)
+        kwargs={}
+        kwargs.update(mp_logger_params)
+        kwargs.update(handler_kwargs)
+        self.mp_logger = MpLogger(**kwargs)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info,)
@@ -153,12 +156,12 @@ def cmdargs():
     parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
     parser.add_argument('--handler-id', type=str, dest="handler_id",
                         help="""Logger name.""")
+    parser.add_argument('--log-info', type=str, dest='log_info',
+                        help="""MpLogger info to using remote client.""")
     #parser.add_argument('--host', type=str, 
     #                    help="""Host to forward messages to (localhost).""")
     #parser.add_argument('--port', type=int, 
     #                    help="""Port to forward messages to.""")
-    parser.add_argument('--log-info', type=str, dest='log_info',
-                        help="""MpLogger info to using remote client.""")
     #parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
     #                    help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
     #parser.add_argument('--server-host', type=str, dest='server_host',
