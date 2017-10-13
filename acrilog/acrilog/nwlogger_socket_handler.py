@@ -116,7 +116,7 @@ class NwLoggerClientHandler(logging.Handler):
         if not sshagent.is_alive():
             module_logger.critical('Agent process terminated unexpectedly: {}'.format(host,))
             sshagent.join()
-            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}.".format(host)) from e
+            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}.".format(host)) 
 
             
     def emit(self, record):
