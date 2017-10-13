@@ -48,31 +48,6 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
     return handlers
 
 
-#def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
-'''
-def get_file_handler(logdir='', process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
-    result=list()
-    if logdir is None: logdir=''
-    
-    #key_s=''
-    if file_suffix: process_key = "%s.%s" %(process_key, file_suffix)
-    if process_key: name = "%s.log" % process_key
-    else: name = 'mplogger.log'
-    if file_prefix: name = "%s.%s" %(file_prefix, name)
-    
-    
-    #print('get_file_handlers: process_key:', process_key)
-    #traceback.print_stack()
-    filename = os.path.join(logdir, name)
-    #handler = TimedSizedRotatingHandler(filename=filename, delay="true", **kwargs)
-    handler = TimedSizedRotatingHandler(filename=filename, **kwargs)
-    #handler.setLevel(logging_level)
-    handler.setFormatter(formatter)
-    result.append(handler)
-    # create error file handler and set level to error
-    
-    return result
-'''
 class BaseLogger(object):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
