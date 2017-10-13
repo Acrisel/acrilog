@@ -118,15 +118,15 @@ class NwLoggerClientHandler(logging.Handler):
             self.sshpipe.start()
         except Exception as e:
             module_logger.exception(e)
-            module_logger.critical('Agent failed to start: {}'.format(host,))
+            module_logger.critical('Agent failed to start: {}'.format(ssh_host,))
             response = self.sshpipe.response()
-            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(host, response)) 
+            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
             
         if not self.sshpipe.is_alive():
-            module_logger.critical('Agent process terminated unexpectedly: {}'.format(host,))
+            module_logger.critical('Agent process terminated unexpectedly: {}'.format(ssh_host,))
             self.sshpipe.join()
             response = self.sshpipe.response()
-            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(host, response)) 
+            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
         
         module_logger.debug("Remote logger SSHPipe started.")
             
