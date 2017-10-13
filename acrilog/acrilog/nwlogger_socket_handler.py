@@ -77,7 +77,7 @@ class NwLoggerClientHandler(logging.Handler):
         del mp_logger_params['port']
         mp_logger_params['name'] += '_nwlogger_client_handler'
         handler_kwargs = mp_logger_params['handler_kwargs']
-        self.mp_logger = MpLogger(**mp_logger_params,)# **handler_kwargs)
+        self.mp_logger = MpLogger(**mp_logger_params, **handler_kwargs)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info,)
@@ -111,8 +111,13 @@ class NwLoggerClientHandler(logging.Handler):
         self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=module_logger) 
         module_logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
         self.sshpipe.start()
-        
         module_logger.debug("Remote logger SSHPipe started.")
+        
+        if not sshagent.is_alive():
+            module_logger.critical('Agent process terminated unexpectedly: {}'.format(host,))
+            sshagent.join()
+            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}.".format(host)) from e
+
             
     def emit(self, record):
         try:
