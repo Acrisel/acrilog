@@ -166,20 +166,7 @@ def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, 
             
     queue_listener = LogRecordQueueListener(loggerq,) # *handlers)
     #queue_listener = LogRecordQueueListener(loggerq, name=name, logging_level=logging_level, logdir=logdir, formatter=record_formatter, process_key=process_key, global_handlers=ghandlers, **kwargs)
-    
-    '''
-    #super(BaseLogger, self).start()
-    if len(self.handlers) == 0:
-        if self.console:
-            handlers = create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
-            for handler in handlers:
-                self.queue_listener.addConsoleHandler(handler)
-        
-    if len(self.handlers) > 0:
-        for handler in self.handlers:
-            self.queue_listener.addHandler(handler)
-    '''
-        
+            
     started.set()
     queue_listener.start_server_until_stopped(abort)
     #logger_name=name

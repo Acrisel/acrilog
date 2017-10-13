@@ -88,7 +88,7 @@ class NwLoggerClientHandler(logging.Handler):
         # but it does need port
         del mp_logger_info['loggerq']
         mp_logger_info['port'] = logger_info['port']
-        mp_logger_info['console'] = False
+        #mp_logger_info['console'] = False
         
         command = ["{}".format(os.path.basename(__file__)),]
         #server_host = logger_info['server_host']

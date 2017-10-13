@@ -116,7 +116,7 @@ class BaseLogger(object):
          'handler_kwargs': kwargs_defaults,
             }
     
-    def __init__(self, name='logger', logging_level=logging.INFO, level_formats={}, datefmt=None, console=True, handlers=[], *args, **kwargs):
+    def __init__(self, name='logger', logging_level=logging.INFO, level_formats={}, datefmt=None, console=False, handlers=[], *args, **kwargs):
         '''Initiates MpLogger service
         
         Args:
