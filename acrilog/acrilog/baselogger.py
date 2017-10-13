@@ -21,7 +21,6 @@
 ##############################################################################
 
 import logging
-from logging.handlers import QueueListener, QueueHandler
 import os
 import multiprocessing as mp
 from copy import copy
@@ -30,7 +29,7 @@ from datetime import datetime
 import sys   
 import socket
 import traceback
-from acrilib import LevelBasedFormatter, LoggerAddHostFilter
+from acrilib import LevelBasedFormatter
 from copy import deepcopy 
      
 
