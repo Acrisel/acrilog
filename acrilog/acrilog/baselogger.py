@@ -24,7 +24,7 @@ import logging
 import os
 import multiprocessing as mp
 from copy import copy
-from acrilib import TimedSizedRotatingHandler
+from acrilib import TimedSizedRotatingHandler, get_file_handler
 from datetime import datetime
 import sys   
 import socket
@@ -49,21 +49,8 @@ def create_stream_handler(logging_level=logging.INFO, level_formats={}, datefmt=
 
 
 #def get_file_handler(logdir='', logging_level=logging.INFO, process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
+'''
 def get_file_handler(logdir='', process_key=None, formatter=None, file_prefix=None, file_suffix=None, **kwargs):
-    '''
-    
-    Args:
-        kwargs:
-            file_mode='a', 
-            maxBytes=0, 
-            backupCount=0, 
-            encoding='ascii', 
-            delay=False, 
-            when='h', 
-            interval=1, 
-            utc=False, 
-            atTime=None
-    '''
     result=list()
     if logdir is None: logdir=''
     
@@ -85,7 +72,7 @@ def get_file_handler(logdir='', process_key=None, formatter=None, file_prefix=No
     # create error file handler and set level to error
     
     return result
-
+'''
 class BaseLogger(object):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
