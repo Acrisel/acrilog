@@ -199,7 +199,6 @@ class NwLogger(BaseLogger):
         
         self.host = host
         self.logger_initialized = False
-        self.name = name if name is not None else 'nwlogger'
         self.logging_level = logging_level
         self.args = args
         #self.kwargs = kwargs

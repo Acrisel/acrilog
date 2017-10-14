@@ -73,7 +73,7 @@ def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, 
 class MpLogger(BaseLogger):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name='logger', logging_level=logging.INFO, *args, **kwargs):
+    def __init__(self, name=None, logging_level=logging.INFO, *args, **kwargs):
         '''Initiates MpLogger service
         
         Args:

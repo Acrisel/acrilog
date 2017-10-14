@@ -77,7 +77,7 @@ class BaseLogger(object):
          'handler_kwargs': kwargs_defaults,
             }
     
-    def __init__(self, name='logger', logging_level=logging.INFO, level_formats={}, datefmt=None, console=False, handlers=[], *args, **kwargs):
+    def __init__(self, name=None, logging_level=logging.INFO, level_formats={}, datefmt=None, console=False, handlers=[], *args, **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -115,7 +115,7 @@ class BaseLogger(object):
         #self.process_key = process_key
         #self.consolidate = consolidate
         self.console = console
-        self.name = name
+        self.name = name if name is not None else 'logger'
         self.handler_kwargs = copy(BaseLogger.kwargs_defaults)
         self.handler_kwargs.update(kwargs)
         self.handler_args = args
