@@ -194,12 +194,12 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
     #print('finished start_nwlogger.')
 
 class NwLogger(BaseLogger):
-    def __init__(self, name='nwlogger', host='localhost', port=None, logging_level=logging.INFO, *args, **kwargs):    
+    def __init__(self, name=None, host='localhost', port=None, logging_level=logging.INFO, *args, **kwargs):    
         super(NwLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
         
         self.host = host
         self.logger_initialized = False
-        self.name = name 
+        self.name = name if name is not None else 'nwlogger'
         self.logging_level = logging_level
         self.args = args
         #self.kwargs = kwargs
