@@ -83,7 +83,7 @@ class NwLoggerClientHandler(logging.Handler):
         self.mp_logger = MpLogger(**kwargs)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
-        module_logger = MpLogger.get_logger(mp_logger_info, name='') # name=mp_logger_params['name'])
+        module_logger = MpLogger.get_logger(mp_logger_info, ) # name=mp_logger_params['name'])
         
         self.addFilter(LoggerAddHostFilter())
         
