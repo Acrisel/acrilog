@@ -45,7 +45,7 @@ class LogRecordQueueListener(QueueListener):
 
 def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     #logger = logging.getLogger(name=self.logging_root)
-    logger = logging.getLogger(name=name)
+    logger = logging.getLogger() #name=name)
     logger.setLevel(logging_level)
     logger.addFilter(LoggerAddHostFilter())
     
@@ -121,7 +121,6 @@ class MpLogger(BaseLogger):
             
     @classmethod
     def get_logger(cls, logger_info, name=None):
-        name = name if name is not None else logger_info['name']
         # create the logger to use.
         logger = BaseLogger.get_logger(logger_info, name)
         logger.addFilter(LoggerAddHostFilter())
@@ -192,17 +191,7 @@ class MpLogger(BaseLogger):
                 self.logger_proc.join()
         #print('Stopped logger.')
         
-        
-    '''    
-    def stop(self,):
-        if self.queue_listener:
-            self.queue_listener.stop()
-            
-    def quite(self,):
-        if self.queue_listener:
-            self.queue_listener.enqueue_sentinel()
-    '''
-                
+                 
 if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')

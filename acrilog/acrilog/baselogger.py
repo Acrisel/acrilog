@@ -182,8 +182,9 @@ class BaseLogger(object):
         return info
             
     @classmethod
-    def get_logger(cls, logger_info, name):
+    def get_logger(cls, logger_info, name=None):
         # create the logger to use.
+        name = name if name is not None else logger_info['name']
         logger = logging.getLogger(name)
         logger.propagate = False
         

@@ -227,7 +227,7 @@ class NwLogger(BaseLogger):
         #logger = BaseLogger.get_logger(logger_info, name)
  
         try:
-            name = name if name is not None else logger_info['name']
+            #name = name if name is not None else logger_info['name']
             # We don't really need host, since it is always localhost
             #host = logger_info['host']
             host = 'localhost'
