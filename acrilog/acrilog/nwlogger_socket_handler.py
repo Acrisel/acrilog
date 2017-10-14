@@ -45,7 +45,7 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         try:
             log_info = yaml.load(log_info)
         except Exception as e:
-            raise Exception("Faild to YAML.load('{}')".format(log_info)) from e
+            raise Exception("Failed to YAML.load('{}')".format(log_info)) from e
         module_logger.debug('Accepted logging info:{}.'.format(log_info))
         self.nwlogger = NwLogger.get_logger(log_info)
                     
