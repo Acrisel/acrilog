@@ -156,8 +156,8 @@ class MpLogger(BaseLogger):
         
         #self.manager = mp.Manager()
         #self.controller = self.manager.Namespace()
-        manager=mp.Manager()    
-        self.loggerq = manager.Queue()
+        #manager = mp.Manager()    
+        self.loggerq = mp.Queue()
 
         self.abort = mp.Event()
         started = mp.Event()

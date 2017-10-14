@@ -75,7 +75,7 @@ class NwLoggerClientHandler(logging.Handler):
         
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
-        mp_logger_params['name'] += '_nwlogger_client_handler'
+        #mp_logger_params['name'] += '_nwlogger_client_handler'
         handler_kwargs = mp_logger_params['handler_kwargs']
         kwargs={}
         kwargs.update(mp_logger_params)
