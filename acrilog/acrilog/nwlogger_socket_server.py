@@ -150,7 +150,7 @@ class NwFilter(logging.Filter):
         return act
     
     
-def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
+def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     ''' starts logger for multiprocessing using queue.
      
     Returns:
@@ -168,12 +168,12 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
         logger_queue = logger_queue_receiver.logger_queue
     else:
         logger_queue = None
-        handler = HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)
-        logger.addHandler(handler)
+        handlers += [HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)]
+        #logger.addHandler(handler)
         if console:
-            handlers = create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
-            for handler in handlers:
-                logger.addHandler(handler)       
+            handlers += create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
+        for handler in handlers:
+            logger.addHandler(handler)       
             
     tcpserver = socketserver.ThreadingTCPServer((host, port), get_log_record_tcp_request_handler(logger_queue=logger_queue, name=name))
     tcpserver.allow_reuse_address = True
@@ -194,12 +194,13 @@ def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatte
     #print('finished start_nwlogger.')
 
 class NwLogger(BaseLogger):
-    def __init__(self, name=None, host='localhost', port=None, logging_level=logging.INFO, *args, **kwargs):    
+    def __init__(self, name=None, host='localhost', port=None, logging_level=logging.INFO, handlers=[], *args, **kwargs):    
         super(NwLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
         
         self.host = host
         self.logger_initialized = False
         self.logging_level = logging_level
+        self.handlers = handlers
         self.args = args
         #self.kwargs = kwargs
         
@@ -266,6 +267,7 @@ class NwLogger(BaseLogger):
             'name': self.name, 
             'host': self.host, 
             'port': self.port, 
+            'handlers': self.handlers,
             'logging_level': self.logging_level, 
             'formatter': self.record_formatter, 
             'level_formats': self.level_formats, 
