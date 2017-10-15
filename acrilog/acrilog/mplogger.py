@@ -43,7 +43,7 @@ class LogRecordQueueListener(QueueListener):
         self.stop()
 
 
-def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
+def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     #logger = logging.getLogger(name=self.logging_root)
     logger = logging.getLogger() #name=name)
     logger.setLevel(logging_level)
@@ -52,7 +52,7 @@ def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, 
     #queue_handler = LogRecordQueueHandler(loggerq)
     #logger.addHandler(queue_handler)
     
-    handlers = [HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)]
+    handlers += [HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)]
     if console:
         console_handlers = create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
         handlers.extend(console_handlers)
@@ -73,7 +73,7 @@ def start_mplogger(name=None, loggerq=None, logging_level=None, formatter=None, 
 class MpLogger(BaseLogger):
     ''' Builds Multiprocessing logger such all process share the same logging mechanism 
     '''
-    def __init__(self, name=None, logging_level=logging.INFO, *args, **kwargs):
+    def __init__(self, name=None, logging_level=logging.INFO, handlers=[], *args, **kwargs):
         '''Initiates MpLogger service
         
         Args:
@@ -111,6 +111,7 @@ class MpLogger(BaseLogger):
         #self.args = args
         #self.kwargs = kwargs
         self.logger_initialized = False
+        self.handlers = handlers
                                         
     def logger_info(self):
         info = super(MpLogger, self).logger_info()
@@ -166,6 +167,7 @@ class MpLogger(BaseLogger):
         start_nwlogger_kwargs = {
             'name': self.name if not name else name, 
             'loggerq': self.loggerq, 
+            'handlers': self.handlers,
             'logging_level': self.logging_level, 
             'formatter': self.record_formatter, 
             'level_formats': self.level_formats, 
