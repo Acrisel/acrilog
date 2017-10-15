@@ -24,7 +24,7 @@ import logging
 import os
 import multiprocessing as mp
 from copy import copy
-from acrilib import TimedSizedRotatingHandler, get_file_handler
+from acrilib import TimedSizedRotatingHandler, get_file_handler, get_hostname
 from datetime import datetime
 import sys   
 import socket
@@ -169,7 +169,7 @@ class BaseLogger(object):
         return result
             
     def logger_info(self):
-        hostname = socket.gethostbyname(socket.gethostname())
+        hostname = get_hostname()
         info = {'name': self.name,
                 #'process_key': self.process_key,
                 #'logdir': self.logdir, 
@@ -200,7 +200,7 @@ class BaseLogger(object):
         #    # just a check for my sanity
         #    assert not isinstance(handler, TimedSizedRotatingHandler)
         #    logger.removeHandler(handler)
-        this_host = socket.gethostbyname(socket.gethostname())
+        this_host = get_hostname() #(full=True)
         
         # server may already started logger
         # if logger_info['server_host'] == server_host: return logger
