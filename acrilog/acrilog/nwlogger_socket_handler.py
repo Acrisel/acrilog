@@ -159,16 +159,6 @@ def cmdargs():
                         help="""Logger name.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
                         help="""MpLogger info to using remote client.""")
-    #parser.add_argument('--host', type=str, 
-    #                    help="""Host to forward messages to (localhost).""")
-    #parser.add_argument('--port', type=int, 
-    #                    help="""Port to forward messages to.""")
-    #parser.add_argument('--logging-level', type=int, default=sshutil.EXIT_MESSAGE, dest='logging_level',
-    #                    help="""string to use as exit message, default: {}.""".format(sshutil.EXIT_MESSAGE))
-    #parser.add_argument('--server-host', type=str, dest='server_host',
-    #                    help="""Logger server host name.""")
-    #parser.add_argument('--logdir', type=str, default='/tmp',
-    #                    help="""Logdir to use, defaults to /tmp.""")
     args = parser.parse_args()  
     
     return args
