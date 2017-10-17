@@ -139,14 +139,14 @@ class MpLogger(BaseLogger):
 
         return logger
 
-    def start(self, ):
+    def start(self, name=None):
         ''' starts logger for multiprocessing using queue.
         
         Args:
-            name: identify starting process to allow it log into its own logger 
+            name: identify starting process to allow it log into its own logger.
 
         Returns:
-            logger: set with correct Q handler
+            logger: set with correct Q handler.
         '''
         # create console handler and set level to info
         
@@ -184,7 +184,7 @@ class MpLogger(BaseLogger):
         
         started.wait()        
 
-        logger = MpLogger.get_logger(self.logger_info(),)
+        logger = MpLogger.get_logger(self.logger_info(), name=name)
         return logger
 
     def stop(self,):

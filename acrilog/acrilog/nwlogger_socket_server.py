@@ -246,7 +246,15 @@ class NwLogger(BaseLogger):
             logger.addFilter(LoggerAddHostFilter())
         return logger
 
-    def start(self,):
+    def start(self, name):
+        ''' starts socket based logger server.
+        
+        Args:
+            name: to associate with local logger (as oppose to server logger).
+            
+        Returns:
+            local logger object.
+        '''
         self.started = mp.Event()
         self.abort = mp.Event()
         self.finished = mp.Event()
@@ -272,7 +280,7 @@ class NwLogger(BaseLogger):
         self.tcpserver.start()
         self.started.wait()
 
-        logger = NwLogger.get_logger(self.logger_info(), )
+        logger = NwLogger.get_logger(self.logger_info(), name=name)
         return logger
     
     def stop(self,):
