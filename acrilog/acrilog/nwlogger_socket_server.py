@@ -246,7 +246,7 @@ class NwLogger(BaseLogger):
             logger.addFilter(LoggerAddHostFilter())
         return logger
 
-    def start(self, name):
+    def start(self, name=None):
         ''' starts socket based logger server.
         
         Args:
