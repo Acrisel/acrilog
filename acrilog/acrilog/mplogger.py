@@ -165,7 +165,7 @@ class MpLogger(BaseLogger):
         self.finished = mp.Event()
         
         start_nwlogger_kwargs = {
-            'name': self.name if not name else name, 
+            'name': self.name, 
             'loggerq': self.loggerq, 
             'handlers': self.handlers,
             'logging_level': self.logging_level, 
