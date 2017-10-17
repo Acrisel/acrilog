@@ -108,7 +108,6 @@ def get_log_record_tcp_request_handler(logger_queue=None, name=None):
             followed by the LogRecord in pickle format. Logs the record
             according to whatever policy is configured locally.
             """
-            #print('start reading from socket.')
             while True:
                 chunk = self.request.recv(4)
                 if len(chunk) < 4:
@@ -119,7 +118,6 @@ def get_log_record_tcp_request_handler(logger_queue=None, name=None):
                     chunk = chunk + self.request.recv(slen - len(chunk))
                 obj = self.unPickle(chunk)
                 record = logging.makeLogRecord(obj)
-                #print('LogRecordStreamHandler handle:', record)
                 self.handleLogRecord(record)
     
         def unPickle(self, data):
@@ -169,7 +167,6 @@ def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=N
     else:
         logger_queue = None
         handlers += [HierarchicalTimedSizedRotatingHandler(*args, formatter=formatter, **kwargs)]
-        #logger.addHandler(handler)
         if console:
             handlers += create_stream_handler(logging_level=logging_level, level_formats=level_formats, datefmt=datefmt)            
         for handler in handlers:
@@ -178,7 +175,6 @@ def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=N
     tcpserver = socketserver.ThreadingTCPServer((host, port), get_log_record_tcp_request_handler(logger_queue=logger_queue, name=name))
     tcpserver.allow_reuse_address = True
     tcpserverproc = th.Thread(name='ThreadingTCPServer', target=tcpserver.serve_forever, daemon=True)
-    #print('About to start TCP server...', host, port)
     tcpserverproc.start()
     # notify caller, process started
     started.set()
@@ -191,7 +187,6 @@ def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=N
     if USE_QUEUE: 
         logger_queue_receiver.stop()
     finished.set()
-    #print('finished start_nwlogger.')
 
 class NwLogger(BaseLogger):
     def __init__(self, name=None, host='localhost', port=None, logging_level=logging.INFO, handlers=[], *args, **kwargs):    
@@ -233,12 +228,9 @@ class NwLogger(BaseLogger):
             #host = logger_info['host']
             host = 'localhost'
             port = logger_info['port']
-            #logging_level = logger_info['logging_level']
         except Exception as e:
             raise AcrilogError("Failed to get info from logger_info: {}".format(repr(logger_info))) from e
         
-        #logger = logging.getLogger(name)
-        #logger.setLevel(logging_level)
         logger = BaseLogger.get_logger(logger_info, name)
         
         # check logger has already proper handlers or not
@@ -249,14 +241,10 @@ class NwLogger(BaseLogger):
                 
         if not already_set:
             socketHandler = logging.handlers.SocketHandler(host, port)
-            #print('get_logger adding handler pid:', os.getpid())
             # socket handler sends the event as an unformatted pickle
             logger.addHandler(socketHandler)
             logger.addFilter(LoggerAddHostFilter())
         return logger
-    
-    #def get_server_logger(self):
-    #    return NwLogger.get_client_logger(self.logger_info())
 
     def start(self):
         self.started = mp.Event()
@@ -283,20 +271,14 @@ class NwLogger(BaseLogger):
         self.tcpserver = mp.Process(name='NwLogger', target=start_nwlogger, kwargs=start_nwlogger_kwargs, daemon=False)
         self.tcpserver.start()
         self.started.wait()
-        #print('logger_proc event started received.')
 
         return 
     
     def stop(self,):
         if self.abort:
-            #print('Stopping logger.')
             self.abort.set()
-            #print('Joining tcpserver.')
             self.finished.wait()
-            #self.started.clear(); self.finished.clear(); self.abort.clear()
-            # TODO: need to work without explicitly calling terminate
             self.tcpserver.terminate()
             self.tcpserver.join()
-            #print('Stopped logger.')
             
         
