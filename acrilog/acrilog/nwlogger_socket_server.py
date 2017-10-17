@@ -246,7 +246,7 @@ class NwLogger(BaseLogger):
             logger.addFilter(LoggerAddHostFilter())
         return logger
 
-    def start(self):
+    def start(self,):
         self.started = mp.Event()
         self.abort = mp.Event()
         self.finished = mp.Event()
@@ -272,7 +272,8 @@ class NwLogger(BaseLogger):
         self.tcpserver.start()
         self.started.wait()
 
-        return 
+        logger = NwLogger.get_logger(self.logger_info(), )
+        return logger
     
     def stop(self,):
         if self.abort:

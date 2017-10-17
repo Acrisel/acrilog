@@ -19,9 +19,9 @@ if config_file.startswith('/private'):
 def main(port=None):
     #logging_config = config.get('LOGGING')
     nwlogger = NwLogger('example', logging_level=logging.DEBUG, console=True, consolidate=False, port=port, logdir='/tmp')
-    nwlogger.start()
+    logger = nwlogger.start()
     
-    print("Logger host, port: {}, {}".format(nwlogger.host, nwlogger.port))
+    logger.info("Logger host, port: {}, {}".format(nwlogger.host, nwlogger.port))
     
     while True:
         time.sleep(0.5)

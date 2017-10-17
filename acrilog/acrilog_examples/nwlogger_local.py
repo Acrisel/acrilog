@@ -41,7 +41,7 @@ def cmdargs():
     progname = filename.rpartition('.')[0]
     
     parser = argparse.ArgumentParser(description="%s runs localhost logging client example" % progname)
-    parser.add_argument('-p', '--port', type=int, default=49740,
+    parser.add_argument('-p', '--port', type=int, default=54246,
                         help="""Port for logging server.""")
     args = parser.parse_args()  
     

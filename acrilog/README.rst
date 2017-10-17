@@ -93,9 +93,9 @@ Within main process
         import multiprocessing as mp
 
         def subproc(limit=1, logger_info=None):
-            logger=MpLogger.get_logger(logger_info, name="acrilog.subproc", )
+            logger = MpLogger.get_logger(logger_info, name="acrilog.subproc", )
     		for i in range(limit):
-                sleep_time=3/random.randint(1,10)
+                sleep_time = 3/random.randint(1,10)
                 time.sleep(sleep_time)
                 logger.info("proc [%s]: %s/%s - sleep %4.4ssec" % (os.getpid(), i, limit, sleep_time))
 
@@ -103,13 +103,13 @@ Within main process
                         'default':   "[ %(asctime)s ][ %(levelname)s ][ %(message)s ]",
                         }
     
-        mplogger=MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
-        logger=mplogger.start(name='main_process')
+        mplogger = MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
+        logger = mplogger.start(name='main_process')
 
         logger.debug("starting sub processes")
-        procs=list()
+        procs = list()
         for limit in [1, 1]:
-            proc=mp.Process(target=subproc, args=(limit, mplogger.logger_info(),))
+            proc = mp.Process(target=subproc, args=(limit, mplogger.logger_info(),))
             procs.append(proc)
             proc.start()
     

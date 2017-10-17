@@ -139,7 +139,7 @@ class MpLogger(BaseLogger):
 
         return logger
 
-    def start(self, name=None, ):
+    def start(self, ):
         ''' starts logger for multiprocessing using queue.
         
         Args:
@@ -183,6 +183,9 @@ class MpLogger(BaseLogger):
         self.logger_proc.start()
         
         started.wait()        
+
+        logger = MpLogger.get_logger(self.logger_info(),)
+        return logger
 
     def stop(self,):
         if self.abort:
