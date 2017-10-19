@@ -99,12 +99,13 @@ Within main process
                 time.sleep(sleep_time)
                 logger.info("proc [%s]: %s/%s - sleep %4.4ssec" % (os.getpid(), i, limit, sleep_time))
 
-        level_formats={logging.DEBUG:"[ %(asctime)s ][ %(levelname)s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
+        level_formats = {logging.DEBUG:"[ %(asctime)s ][ %(levelname)s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
                         'default':   "[ %(asctime)s ][ %(levelname)s ][ %(message)s ]",
                         }
     
         mplogger = MpLogger(logging_level=logging.DEBUG, level_formats=level_formats, datefmt='%Y-%m-%d,%H:%M:%S.%f')
-        logger = mplogger.start(name='main_process')
+        mplogger.start(name='main_process')
+        logger = MpLogger.get_logger(mplogger.logger_info())
 
         logger.debug("starting sub processes")
         procs = list()
@@ -189,7 +190,8 @@ Change History
          add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
          MpLogger.__init__() **name** argument will be used for consolidated log.
     1.1: add **file_prefix** and **file_suffix** as MpLogger parameters.
-         fix bug when logdir is Nonw 
+         fix bug when logdir is None.
+    2.0: added NwLogger starting a server logger with NwLoggerClientHandler for remote processes.
     
         
 Next Steps
