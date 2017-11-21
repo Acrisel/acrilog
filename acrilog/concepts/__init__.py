@@ -73,22 +73,24 @@ class LogRecordTCPRequestHandler(socketserver.BaseRequestHandler):
         # to do filtering, do it at the client end to save wasting
         # cycles and network bandwidth!
         logger.handle(record)        
-        
-class NwFilter(logging.Filter):
+
+
+class KeyFilter(logging.Filter):
     """
     """
     def __init__(self, name, separator = '.', key='name', *args, **kwargs):
-        super(NwFilter, self).__init__(*args, **kwargs)
+        super(KeyFilter, self).__init__(*args, **kwargs)
         self.name = name
         self.separator = separator
         self.key = key
         self.__parts = name.split(separator)
-        
+
     def filter(self, record):
         name = getattr(record, self.key)
         act = name.startswith(self.name)
         return act
-    
+
+
 def start_nwlogger(name=None, host=None, port=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     ''' starts logger for multiprocessing using queue.
      

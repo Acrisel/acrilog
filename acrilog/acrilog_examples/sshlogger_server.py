@@ -4,7 +4,7 @@ Created on Sep 24, 2017
 
 @author: arnon
 '''
-from acrilog import NwLogger
+from acrilog import SSHLogger
 import multiprocessing as mp
 import logging
 import time
@@ -14,19 +14,20 @@ config_file = os.path.abspath('logger.conf')
 # because OSX adds /var -> /private/var
 if config_file.startswith('/private'):
     config_file = config_file[8:]
-          
-                    
+
+
 def main(port=None):
     #logging_config = config.get('LOGGING')
-    nwlogger = NwLogger('example', logging_level=logging.DEBUG, console=True, consolidate=False, port=port, logdir='/tmp')
-    logger = nwlogger.start()
-    
-    logger.info("Logger host, port: {}, {}".format(nwlogger.host, nwlogger.port))
-    
+    sshlogger = SSHLogger('example', logging_level=logging.DEBUG, console=True, consolidate=False, port=port, logdir='/tmp')
+    logger = sshlogger.start()
+
+    logger.info("Logger host, port: {}, {}".format(sshlogger.host, sshlogger.port))
+
     while True:
         time.sleep(0.5)
-    
-    nwlogger.stop()
+  
+    sshlogger.stop()
+
 
 def cmdargs():
     import argparse

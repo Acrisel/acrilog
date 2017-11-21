@@ -1,5 +1,5 @@
-include README.rst
-include INSTALL
-include LICENSE
-include MANIFEST.in
-include CHANGES.txt
+include README*
+include INSTALL*
+include LICENSE*
+include CHANGES*
+include setup_utils*

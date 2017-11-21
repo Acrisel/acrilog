@@ -1,8 +1,7 @@
 eclipse.preferences.version=1
-encoding//acrilog/baselogger.py=utf-8
-encoding//acrilog/mplogger.py=utf-8
-encoding//acrilog/nwlogger_logging_server.py=utf-8
-encoding//acrilog/nwlogger_socket_server.py=utf-8
+encoding//acrilog/lib/baselogger.py=utf-8
+encoding//acrilog/lib/mplogger.py=utf-8
+encoding//acrilog/lib/sshlogger_socket_server.py=utf-8
 encoding//acrilog_examples/mplogger.py=utf-8
 encoding//build/lib/acrilog/mplogger.py=utf-8
 encoding//concepts/__init__.py=utf-8

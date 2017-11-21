@@ -27,20 +27,22 @@ import socketserver
 import struct
 import multiprocessing as mp
 import threading as th
-from acrilog.baselogger import BaseLogger, create_stream_handler
+from acrilog.lib.baselogger import BaseLogger, create_stream_handler
 from acrilib import LoggerAddHostFilter, get_free_port, get_hostname, get_ip_address, HierarchicalTimedSizedRotatingHandler
 
 
 # TODO: get USE_QUEUE = True working without warnings at the end.
 USE_QUEUE = False
 
+
 class AcrilogError(Exception):
     pass
 
+
 class LoggerQueueReceiver(object):
-    
+
     ABORT='ABORT'
-    
+
     def __init__(self, name=None, logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, args=(), kwargs={}):
         self.logger_queue = mp.Queue()
         self.name = name
@@ -51,13 +53,13 @@ class LoggerQueueReceiver(object):
         self.console = console
         self.args = args
         self.kwargs = kwargs
-        
+
     def receiver(self,):
         logger = logging.getLogger(name=self.name)
         logger.setLevel(self.logging_level)
         handler = HierarchicalTimedSizedRotatingHandler(*self.args, formatter=self.formatter, **self.kwargs)
         logger.addHandler(handler)
-        
+
         if self.console:
             handlers = create_stream_handler(logging_level=self.logging_level, level_formats=self.level_formats, datefmt=self.datefmt)            
             for handler in handlers:
@@ -71,22 +73,22 @@ class LoggerQueueReceiver(object):
                 else:
                     self.logger_queue.close()
                     break
-                
+
     def start(self):
         self.process = mp.Process(name='LoggerQueueReceiver', target=self.receiver, daemon=True)
         self.process.start()
-    
+
     def stop(self):
         self.logger_queue.put(LoggerQueueReceiver.ABORT)
         self.process.join()
-        
-        
+
+
 def local_logger(record, name=None):
     # if a name is specified, we use the named logger rather than the one
     # implied by the record.
     if name is None:
         name = record.name
-        
+
     logger = logging.getLogger(name)
     # N.B. EVERY record gets logged. This is because Logger.handle
     # is normally called AFTER logger-level filtering. If you want
@@ -98,11 +100,11 @@ def local_logger(record, name=None):
 def get_log_record_tcp_request_handler(logger_queue=None, name=None):
     class LogRecordTCPRequestHandler(socketserver.BaseRequestHandler):
         """Handler for a streaming logging request.
-    
+
         This basically logs the record using whatever logging policy is
         configured locally.
         """
-            
+
         def handle(self):
             """Handles multiple requests - each expected to be a 4-byte length,
             followed by the LogRecord in pickle format. Logs the record
@@ -119,43 +121,44 @@ def get_log_record_tcp_request_handler(logger_queue=None, name=None):
                 obj = self.unPickle(chunk)
                 record = logging.makeLogRecord(obj)
                 self.handleLogRecord(record)
-    
+
         def unPickle(self, data):
             return pickle.loads(data)
-    
+
         def handleLogRecord(self, record):
             if logger_queue is None:
                 # set name to None so record.name will be used
                 local_logger(record, name=None)
             else:
                 logger_queue.put(record)
-                
-    return LogRecordTCPRequestHandler        
-        
-class NwFilter(logging.Filter):
+
+    return LogRecordTCPRequestHandler
+
+
+class KeyFilter(logging.Filter):
     """
     """
-    def __init__(self, name, separator = '.', key='name', *args, **kwargs):
-        super(NwFilter, self).__init__(*args, **kwargs)
+    def __init__(self, name, separator='.', key='name', *args, **kwargs):
+        super(KeyFilter, self).__init__(*args, **kwargs)
         self.name = name
         self.separator = separator
         self.key = key
         self.__parts = name.split(separator)
-        
+
     def filter(self, record):
         name = getattr(record, self.key)
         act = name.startswith(self.name)
         return act
-    
-    
-def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
+
+
+def start_sshlogger(name=None, host=None, port=None, handlers=[], logging_level=None, formatter=None, level_formats=None, datefmt=None, console=False, started=None, abort=None, finished=None, args=(), kwargs={},):
     ''' starts logger for multiprocessing using queue.
-     
+
     Returns:
          logger: set with correct socket handler
     '''
     # create console handler and set level to info
-    
+
     logger = logging.getLogger(name=name)
     logger.setLevel(logging_level)
     logger.addFilter(LoggerAddHostFilter())
@@ -188,17 +191,18 @@ def start_nwlogger(name=None, host=None, port=None, handlers=[], logging_level=N
         logger_queue_receiver.stop()
     finished.set()
 
-class NwLogger(BaseLogger):
+
+class SSHLogger(BaseLogger):
     def __init__(self, name=None, host='localhost', port=None, logging_level=logging.INFO, handlers=[], *args, **kwargs):    
-        super(NwLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
-        
+        super(SSHLogger, self).__init__(*args, name=name, logging_level=logging_level, **kwargs)
+
         self.host = host
         self.logger_initialized = False
         self.logging_level = logging_level
         self.handlers = handlers
         self.args = args
-        #self.kwargs = kwargs
-        
+        # self.kwargs = kwargs
+
         if port is None:
             try:
                 port = get_free_port()
@@ -208,9 +212,9 @@ class NwLogger(BaseLogger):
                 raise AcrilogError('Failed to get free port, got None.')
         #self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self.port = port
-        
+
     def logger_info(self):
-        info = super(NwLogger, self).logger_info()
+        info = super(SSHLogger, self).logger_info()
         info.update({
                 'host': self.host,
                 'port': self.port,
@@ -276,11 +280,11 @@ class NwLogger(BaseLogger):
             'kwargs':self.handler_kwargs,
         }
         
-        self.tcpserver = mp.Process(name='NwLogger', target=start_nwlogger, kwargs=start_nwlogger_kwargs, daemon=False)
+        self.tcpserver = mp.Process(name='NwLogger', target=start_sshlogger, kwargs=start_nwlogger_kwargs, daemon=False)
         self.tcpserver.start()
         self.started.wait()
 
-        logger = NwLogger.get_logger(self.logger_info(), name=name)
+        logger = SSHLogger.get_logger(self.logger_info(), name=name)
         return logger
     
     def stop(self,):

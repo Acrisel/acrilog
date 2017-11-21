@@ -22,13 +22,13 @@
 #
 ##############################################################################
 import multiprocessing as mp
-from acrilog import NwLogger
+from acrilog.lib.sshlogger_socket_server import SSHLogger
 import os
 import sshutil
 import logging
 from copy import deepcopy
 from acrilib import LoggerAddHostFilter
-from acrilog.mplogger import MpLogger
+from acrilog.lib.mplogger import MpLogger
 import yaml
 from sshutil import SSHPipeHandler
 
@@ -36,10 +36,11 @@ from sshutil import SSHPipeHandler
 module_logger = logging.getLogger(__name__)
 
 
-class NwLoggerHandlerError(Exception): pass
+class SSHLoggerHandlerError(Exception): pass
+
 
 class LoggingSSHPipeHandler(SSHPipeHandler):
-    
+
     def __init__(self, log_info=None, *args, **kwargs):
         super(LoggingSSHPipeHandler, self).__init__(*args, **kwargs)
         try:
@@ -47,32 +48,32 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         except Exception as e:
             raise Exception("Failed to YAML.load('{}')".format(log_info)) from e
         module_logger.debug('Accepted logging info:{}.'.format(log_info))
-        self.nwlogger = NwLogger.get_logger(log_info)
-                    
+        self.sshlogger = SSHLogger.get_logger(log_info)
+
     def handle(self, received):
         # it may be "TERM" message or alike
         if isinstance(received, logging.LogRecord):
-            self.nwlogger.handle(received)
+            self.sshlogger.handle(received)
 
-            
-class NwLoggerClientHandler(logging.Handler):
+
+class SSHLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
-    
+
     NwLoggerClientHandler create handler object that sends 
     '''
-    
+
     def __init__(self, logger_info, ssh_host,): # logger=None, logdir='/tmp'):
         ''' Initiate logger client on remote connecting to host:port
-        
+
         Args:
             logger_info: result of NwLogger.logger_info().
             ssh_host: SSH config Host to connect to.
         '''
         global module_logger
-        super(NwLoggerClientHandler, self).__init__()
+        super(SSHLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
         self.sshpipe = None
-        
+
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
         mp_logger_params['name'] += '_nwlogger_client_handler'
@@ -84,35 +85,34 @@ class NwLoggerClientHandler(logging.Handler):
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info, ) # name=mp_logger_params['name'])
-        
+
         self.addFilter(LoggerAddHostFilter())
-        
+
         # there is no need to pass loggerq via ssh.  
         # alos, it wont work anyhow.
         # but it does need port
         del mp_logger_info['loggerq']
         mp_logger_info['port'] = logger_info['port']
-        #mp_logger_info['console'] = False
-        
-        command = ["{}".format(os.path.basename(__file__)),]
-        #server_host = logger_info['server_host']
-        
-        #logger_name = "{}_nwlogger_handler_{}_{}".format(logger_info['name'], logger_info['server_host'], os.getpid())
+        # mp_logger_info['console'] = False
+
+        command = ["{}".format(os.path.basename(__file__)), ]
+        # server_host = logger_info['server_host']
+
+        # logger_name = "{}_nwlogger_handler_{}_{}".format(logger_info['name'], logger_info['server_host'], os.getpid())
         logger_name = logger_info['name']
         kwargs = {"--handler-id": logger_name,
-                  #"--host": server_host, #logger_info['host'],
-                  #"--port": logger_info['port'],
+                  # "--host": server_host, #logger_info['host'],
+                  # "--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
-                  #"--logging-level": logger_info['logging_level'],
-                  #"--server-host": logger_info['server_host'],
-                  #"--logdir": logdir,
+                  # "--logging-level": logger_info['logging_level'],
+                  # "--server-host": logger_info['server_host'],
+                  # "--logdir": logdir,
                   }
         command.extend(["{} {}".format(name, value) for name, value in kwargs.items()])
         command = ' '.join(command)
-        #print('running SSHPipe:', ssh_host, command)
-        
+
         logname = '{}.sshpipe'.format(logger_info['name'],)
-        
+
         try:
             self.sshpipe = sshutil.SSHPipe(ssh_host, command, name=logname, logger=module_logger) 
             module_logger.debug("Starting remote logger SSHPipe on host: {}, command: {}".format(ssh_host, command))
@@ -121,54 +121,30 @@ class NwLoggerClientHandler(logging.Handler):
             module_logger.exception(e)
             module_logger.critical('Agent failed to start: {}'.format(ssh_host,))
             response = self.sshpipe.response()
-            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
-            
+            raise SSHLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
+
         if not self.sshpipe.is_alive():
             module_logger.critical('Agent process terminated unexpectedly: {}'.format(ssh_host,))
             self.sshpipe.join()
             response = self.sshpipe.response()
-            raise NwLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
-        
+            raise SSHLoggerHandlerError("Failed to start SSHPipe to: {}; response: {}.".format(ssh_host, response)) 
+
         module_logger.debug("Remote logger SSHPipe started.")
-            
+
     def emit(self, record):
         try:
             self.sshpipe.send(record)
         except Exception as e:
-            raise NwLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
-        
+            raise SSHLoggerHandlerError("Failed SSHPipe send: {}.".format(record.msg)) from e
+
     def __del__(self):
         self.close()
-        
+
     def close(self):
         if self.mp_logger:
             self.mp_logger.stop()
         #if self.sshpipe:
         if self.sshpipe.is_alive():
             self.sshpipe.close()
-        super(NwLoggerClientHandler, self).close()
-        
-def cmdargs():
-    import argparse
-    
-    filename = os.path.basename(__file__)
-    progname = filename.rpartition('.')[0]
-    
-    parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
-    parser.add_argument('--handler-id', type=str, dest="handler_id",
-                        help="""Logger name.""")
-    parser.add_argument('--log-info', type=str, dest='log_info',
-                        help="""MpLogger info to using remote client.""")
-    args = parser.parse_args()  
-    
-    return args
- 
-        
-if __name__ == '__main__':
-    mp.freeze_support()
-    mp.set_start_method('spawn')
-    
-    args = cmdargs()
-    #start_nwlogger_client(**vars(args))
-    client = LoggingSSHPipeHandler(**vars(args))
-    client.service_loop()
+        super(SSHLoggerClientHandler, self).close()
+

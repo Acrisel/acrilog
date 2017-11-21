@@ -29,44 +29,53 @@ import os
 
 
 def procly(limit=1, logger_info=None):
-    logger = MpLogger.get_logger(logger_info, name="%s.procly.%s" % (logger_info['name'], limit), )
-    #logger=logging.getLogger("acrilog")
-    #logger.setLevel(logging.DEBUG)
+    logger = MpLogger.get_logger(logger_info, name="%s.procly.%s"
+                                 % (logger_info['name'], limit), )
+    # logger=logging.getLogger("acrilog")
+    # logger.setLevel(logging.DEBUG)
+
     for i in range(limit):
-        sleep_time = 3/random.randint(1,10)
-        logger.debug("%s/%s - sleep %4.4ssec engaging" % (i, limit, sleep_time))
+        sleep_time = 3 / random.randint(1, 10)
+        logger.debug("%s/%s - sleep %4.4ssec starting"
+                     % (i, limit, sleep_time))
         time.sleep(sleep_time)
-        logger.info("%s/%s - sleep %4.4ssec competed" % (i, limit, sleep_time))
+        logger.info("%s/%s - sleep %4.4ssec completed"
+                    % (i, limit, sleep_time))
 
-level_formats = {logging.DEBUG:"[ %(asctime)-26s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
-                'default':   "[ %(asctime)-26s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ]",
-                }
 
-logdir = os.getcwd()
+level_formats = {
+    logging.DEBUG: (u"[ %(asctime)-26s ][ %(processName)-11s ]"
+                    "[ %(levelname)-7s ][ %(message)s ]"
+                    "[ %(module)s.%(funcName)s(%(lineno)d) ]"),
+    'default':   (u"[ %(asctime)-26s ][ %(processName)-11s ]"
+                  "[ %(levelname)-7s ][ %(message)s ]"),
+    }
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')
-    
-    mplogger = MpLogger(name='acrilog', 
-                      logdir='/var/acrisel/log/acrilog', 
-                      logging_level=logging.DEBUG, 
-                      level_formats=level_formats,
-                      #console=True, 
-                      #consolidate=True,
-                      datefmt='%Y-%m-%d,%H:%M:%S.%f',
-                      encoding='utf8',
-                      file_mode='w',
-                      file_prefix='acrilog_%s' % os.getpid(),
-                      file_suffix='%s' % os.getpid(),
-                      # process_key=['processName'], 
-                      )
-    logger = mplogger.start() #'acrilog_main')
-    
-    #logger=logging.getLogger('acrilog')
+
+    mplogger = MpLogger(
+        name='acrilog',
+        logdir='/var/acrisel/log/acrilog',
+        logging_level=logging.DEBUG,
+        level_formats=level_formats,
+        encoding='utf8',
+        console=True,
+        # consolidate=True,
+        datefmt='%Y-%m-%d,%H:%M:%S.%f',
+        file_mode='w',
+        file_prefix='acrilog_%s' % os.getpid(),
+        file_suffix='%s' % os.getpid(),
+        )
+    mplogger.start()
+
+    # logger=logging.getLogger('acrilog')
     logger_info = mplogger.logger_info()
-    #logger=MpLogger.get_logger(name='acrilog', logger_info=logger_info)
-    print('logger_info:', logger_info)
+    logger = MpLogger.get_logger(logger_info)
+    # logger=MpLogger.get_logger(name='acrilog', logger_info=logger_info)
+    # print('logger_info:', logger_info)
     logger.info("starting sub processes")
     procs = list()
     seq = 0
@@ -76,16 +85,13 @@ if __name__=='__main__':
         proc.name = 'subproc-%s' % seq
         procs.append(proc)
         proc.start()
-    
-    
+        logger.info("Sub process {} launched.".format(proc.name))
+
     for proc in procs:
         if proc:
             proc.join()
-        
+
     logger.debug("sub processes completed; \u2754")
     logger.info("sub processes completed;")
-    
+
     mplogger.stop()
-
-    
-
