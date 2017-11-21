@@ -66,7 +66,7 @@ class SSHLoggerClientHandler(logging.Handler):
         ''' Initiate logger client on remote connecting to host:port
 
         Args:
-            logger_info: result of NwLogger.logger_info().
+            logger_info: result of SSHLogger.logger_info().
             ssh_host: SSH config Host to connect to.
         '''
         global module_logger
@@ -76,9 +76,9 @@ class SSHLoggerClientHandler(logging.Handler):
 
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
-        mp_logger_params['name'] += '_nwlogger_client_handler'
-        handler_kwargs = mp_logger_params['handler_kwargs']
-        kwargs={}
+        mp_logger_params['name'] += '_sshlogger_client_handler'
+        handler_kwargs = mp_logger_params.get('handler_kwargs', dict())
+        kwargs = {}
         kwargs.update(mp_logger_params)
         kwargs.update(handler_kwargs)
         self.mp_logger = MpLogger(**kwargs)

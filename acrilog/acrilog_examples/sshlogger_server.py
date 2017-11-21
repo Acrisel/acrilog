@@ -17,7 +17,7 @@ if config_file.startswith('/private'):
 
 
 def main(port=None):
-    #logging_config = config.get('LOGGING')
+    # logging_config = config.get('LOGGING')
     sshlogger = SSHLogger('example', logging_level=logging.DEBUG, console=True, consolidate=False, port=port, logdir='/tmp')
     logger = sshlogger.start()
 
@@ -31,18 +31,18 @@ def main(port=None):
 
 def cmdargs():
     import argparse
-    
+
     filename = os.path.basename(__file__)
     progname = filename.rpartition('.')[0]
-    
+
     parser = argparse.ArgumentParser(description="%s runs SSH logging client example" % progname)
-    parser.add_argument('-p', '--port', type=int, required=False, #default=49740,
+    parser.add_argument('-p', '--port', type=int, required=False,  # default=49740,
                         help="""Port for logging server.""")
-    args = parser.parse_args()  
-    
+    args = parser.parse_args()
+
     return args
 
-    
+
 if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')
