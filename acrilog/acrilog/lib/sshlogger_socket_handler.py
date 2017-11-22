@@ -42,6 +42,7 @@ class SSHLoggerHandlerError(Exception):
 class LoggingSSHPipeHandler(SSHPipeHandler):
 
     def __init__(self, log_info=None, *args, **kwargs):
+        global module_logger
         super(LoggingSSHPipeHandler, self).__init__(*args, **kwargs)
         try:
             log_info = yaml.load(log_info)
