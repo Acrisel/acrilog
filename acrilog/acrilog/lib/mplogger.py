@@ -25,7 +25,8 @@ from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
 from acrilog.lib.baselogger import BaseLogger, create_stream_handler
 from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
-import threading as th
+# import threading as th
+
 
 class LogRecordQueueListener(QueueListener):
     def __init__(self, queue, verbose=False):  # *handlers):
@@ -36,7 +37,8 @@ class LogRecordQueueListener(QueueListener):
         name = record.name
         logger = logging.getLogger(name)
         record = self.prepare(record)
-        logger.handle(record)
+        print('LogRecordQueueListener record:', record)
+        logger.h(record)
 
     def start_server_wait_event(self, abort):
         if self.verbose:
@@ -71,7 +73,15 @@ def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
     for handler in handlers:
         logger.addHandler(handler)
 
-    queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
+    queue_listener = QueueListener(loggerq, *handlers)
+    # queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
+    if verbose:
+        print('start_mplogger: starting listener.')
+    queue_listener.start()
+    if verbose:
+        print('start_mplogger: listener started.')
+    return queue_listener
+
     if verbose:
         print('start_mplogger: setting started.')
     started.set()
@@ -124,7 +134,7 @@ class MpLogger(BaseLogger):
         super(MpLogger, self).__init__(*args, name=name,
                                        logging_level=logging_level, **kwargs)
 
-        self.queue_listener = None
+        self._queue_listener = None
         self.abort = None
         self.logger_initialized = False
         self.handlers = handlers
@@ -197,6 +207,9 @@ class MpLogger(BaseLogger):
             'kwargs': self.handler_kwargs,
             'verbose': self.verbose,
             }
+
+        self._queue_listener = start_mplogger(**start_kwargs)
+        '''
         self.logger_proc = mp.Process(target=start_mplogger,
                                       kwargs=start_kwargs, daemon=True)
         # self.logger_proc = th.Thread(target=start_mplogger,
@@ -204,11 +217,16 @@ class MpLogger(BaseLogger):
         self.logger_proc.start()
 
         started.wait()
+        '''
         logger_info = self.logger_info()
         logger = MpLogger.get_logger(logger_info=logger_info, name=name)
         return logger
 
     def stop(self,):
+        if self._queue_listener:
+            self._queue_listener.stop()
+            self.__queue_listener = None
+        '''
         if self.abort:
             if self.verbose:
                 print('mplogger stop: setting abort.')
@@ -219,6 +237,7 @@ class MpLogger(BaseLogger):
             if self.verbose:
                 print('mplogger stop: joining process.')
             self.logger_proc.join()
+        '''
 
 
 if __name__ == '__main__':

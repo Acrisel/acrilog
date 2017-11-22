@@ -68,14 +68,12 @@ if __name__ == '__main__':
         file_mode='w',
         file_prefix='acrilog_%s' % os.getpid(),
         file_suffix='%s' % os.getpid(),
+        verbose=True,
         )
     mplogger.start()
 
-    # logger=logging.getLogger('acrilog')
     logger_info = mplogger.logger_info()
     logger = MpLogger.get_logger(logger_info)
-    # logger=MpLogger.get_logger(name='acrilog', logger_info=logger_info)
-    # print('logger_info:', logger_info)
     logger.info("starting sub processes")
     procs = list()
     seq = 0
