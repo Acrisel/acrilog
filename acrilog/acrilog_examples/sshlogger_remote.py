@@ -32,7 +32,7 @@ def main(port):
     logger.setLevel(logging.DEBUG)
 
     print('sleeping for a little.')
-    time.sleep(15)
+    time.sleep(5)
     print('done sleeping.')
 
     logger.info('How quickly daft jumping zebras vex.')

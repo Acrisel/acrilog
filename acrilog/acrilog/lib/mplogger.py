@@ -51,6 +51,15 @@ class LogRecordQueueListener(QueueListener):
             print('start_server_wait_event: stopping.')
         self.stop()
 
+class _QueueListener(QueueListener):
+    def dequeue(self, block):
+        ''' adding capture to EOF
+        '''
+        try:
+            item = self.queue.get(block)
+        except EOFError:
+            item = None
+        return item
 
 def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
                    formatter=None, level_formats=None, datefmt=None,
@@ -73,7 +82,7 @@ def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
     for handler in handlers:
         logger.addHandler(handler)
 
-    queue_listener = QueueListener(loggerq, *handlers)
+    queue_listener = _QueueListener(loggerq, *handlers)
     # queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
     if verbose:
         print('start_mplogger: starting listener.')
