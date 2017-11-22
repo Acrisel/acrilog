@@ -148,6 +148,7 @@ class SSHLoggerClientHandler(logging.Handler):
     def close(self):
         if self.mp_logger:
             self.mp_logger.stop()
+            self.mp_logger = None
         #if self.sshpipe:
         if self.sshpipe.is_alive():
             self.sshpipe.close()
