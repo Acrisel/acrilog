@@ -36,7 +36,8 @@ from sshutil import SSHPipeHandler
 module_logger = logging.getLogger(__name__)
 
 
-class SSHLoggerHandlerError(Exception): pass
+class SSHLoggerHandlerError(Exception):
+    pass
 
 
 class LoggingSSHPipeHandler(SSHPipeHandler):

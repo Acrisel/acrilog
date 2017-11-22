@@ -24,7 +24,7 @@ def main(port):
         'logging_level': logging.DEBUG,
         'server_host': 'arnon-mbp',
         }
-    
+
     logger = SSHLogger.get_logger(logger_info)
 
     time.sleep(30)
@@ -42,9 +42,9 @@ def cmdargs():
     progname = filename.rpartition('.')[0]
 
     parser = argparse.ArgumentParser(description="%s runs localhost logging client example" % progname)
-    parser.add_argument('-p', '--port', type=int, default=54246,
+    parser.add_argument('-p', '--port', type=int, default=55105,
                         help="""Port for logging server.""")
-    args = parser.parse_args()  
+    args = parser.parse_args()
 
     return args
 

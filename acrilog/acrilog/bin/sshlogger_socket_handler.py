@@ -41,7 +41,7 @@ def cmdargs():
                         help="""Logger name.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
                         help="""MpLogger info to using remote client.""")
-    args = parser.parse_args()  
+    args = parser.parse_args()
 
     return args
 
