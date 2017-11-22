@@ -22,13 +22,12 @@
 #
 ##############################################################################
 import multiprocessing as mp
-from acrilog.lib.sshlogger_socket_server import SSHLogger
 import os
 import sshutil
 import logging
 from copy import deepcopy
 from acrilib import LoggerAddHostFilter
-from acrilog.lib.mplogger import MpLogger
+from acrilog import MpLogger, SSHLogger
 import yaml
 from sshutil import SSHPipeHandler
 
@@ -47,6 +46,9 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
             log_info = yaml.load(log_info)
         except Exception as e:
             raise Exception("Failed to YAML.load('{}')".format(log_info)) from e
+        
+        # TODO: why do we need to do such assignment if logger has proper handler
+        module_logger = self.module_logger
         module_logger.debug('Accepted logging info:{}.'.format(log_info))
         self.sshlogger = SSHLogger.get_logger(log_info)
 
@@ -81,6 +83,7 @@ class SSHLoggerClientHandler(logging.Handler):
         kwargs = {}
         kwargs.update(mp_logger_params)
         kwargs.update(handler_kwargs)
+        
         self.mp_logger = MpLogger(**kwargs)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()

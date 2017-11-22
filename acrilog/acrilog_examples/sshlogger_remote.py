@@ -16,6 +16,7 @@ module_logger.setLevel(logging.DEBUG)
 
 
 def main(port):
+    print('running')
 
     logger_info = {
         'name': 'example.e1',
@@ -30,13 +31,16 @@ def main(port):
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
 
-    time.sleep(30)
+    print('sleeping for a little.')
+    time.sleep(15)
+    print('done sleeping.')
 
     logger.info('How quickly daft jumping zebras vex.')
     logger.warning('Jail zesty vixen who grabbed pay from quack.')
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
-
+    
+    print('done logging.')
 
 def cmdargs():
     import argparse
@@ -48,7 +52,7 @@ def cmdargs():
     parser.add_argument('-p', '--port', type=int, default=54973,
                         help="""Port for logging server.""")
     args = parser.parse_args()
-
+    print(args)
     return args
 
 
