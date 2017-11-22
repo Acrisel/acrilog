@@ -49,9 +49,10 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
             msg = "Failed to YAML.load('{}')".format(log_info)
             raise Exception(msg) from e
 
-        # TODO: why do we need to do such assignment if logger has proper handler
+        # TODO: why do we need to do such assignment
+        #       if logger has proper handler
         module_logger = self.module_logger
-        module_logger.debug('Accepted logging info:{}.'.format(log_info))
+        module_logger.debug('Accepted logging info:\n    {}.'.format(log_info))
         self.sshlogger = SSHLogger.get_logger(log_info)
 
     def handle(self, received):
