@@ -183,6 +183,7 @@ class MpLogger(BaseLogger):
 
         if self.logger_initialized:
             return
+        
         self.logger_initialized = True
 
         self.loggerq = mp.Queue()
