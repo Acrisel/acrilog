@@ -57,9 +57,9 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
 
     def handle(self, received):
         # it may be "TERM" message or alike
+        module_logger.debug('Handling record:\n    {}.'
+                            .format(repr(received)))
         if isinstance(received, logging.LogRecord):
-            module_logger.debug('Handling record:\n    {}.'
-                                .format(repr(received)))
             self.sshlogger.handle(received)
 
 
