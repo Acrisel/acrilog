@@ -81,7 +81,7 @@ def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
     if verbose:
         print('start_mplogger: listener started.')
     return queue_listener
-
+    '''
     if verbose:
         print('start_mplogger: setting started.')
     started.set()
@@ -89,6 +89,7 @@ def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
     if verbose:
         print('start_mplogger: setting finished.')
     finished.set()
+    '''
 
 
 class MpLogger(BaseLogger):
@@ -187,9 +188,9 @@ class MpLogger(BaseLogger):
         self.loggerq = mp.Queue()
 
         # self._manager = manager = mp.Manager()
-        self.abort = mp.Event()
-        started = mp.Event()
-        self.finished = mp.Event()
+        # self.abort = mp.Event()
+        # started = mp.Event()
+        # self.finished = mp.Event()
 
         start_kwargs = {
             'name': self.name,
@@ -200,7 +201,7 @@ class MpLogger(BaseLogger):
             'level_formats': self.level_formats,
             'datefmt': self.datefmt,
             'console': self.console,
-            'started': started,
+            # 'started': started,
             'abort': self.abort,
             'finished': self.finished,
             'args': self.handler_args,
@@ -224,7 +225,11 @@ class MpLogger(BaseLogger):
 
     def stop(self,):
         if self._queue_listener:
+            if self.verbose:
+                print('mplogger stop: stopping queue listener.')
             self._queue_listener.stop()
+            if self.verbose:
+                print('mplogger stop: queue listener stopped.')
             self.__queue_listener = None
         '''
         if self.abort:
