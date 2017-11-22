@@ -177,9 +177,9 @@ class MpLogger(BaseLogger):
         self.loggerq = mp.Queue()
 
         # self._manager = manager = mp.Manager()
-        self.abort = th.Event()
-        started = th.Event()
-        self.finished = th.Event()
+        self.abort = mp.Event()
+        started = mp.Event()
+        self.finished = mp.Event()
 
         start_kwargs = {
             'name': self.name,
@@ -197,10 +197,10 @@ class MpLogger(BaseLogger):
             'kwargs': self.handler_kwargs,
             'verbose': self.verbose,
             }
-        #self.logger_proc = mp.Process(target=start_mplogger,
-        #                              kwargs=start_kwargs, daemon=True)
-        self.logger_proc = th.Thread(target=start_mplogger,
-                                      kwargs=start_kwargs, daemon=False)
+        self.logger_proc = mp.Process(target=start_mplogger,
+                                      kwargs=start_kwargs, daemon=True)
+        # self.logger_proc = th.Thread(target=start_mplogger,
+        #                               kwargs=start_kwargs, daemon=False)
         self.logger_proc.start()
 
         started.wait()
