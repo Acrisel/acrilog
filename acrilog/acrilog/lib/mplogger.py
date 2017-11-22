@@ -25,7 +25,7 @@ from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
 from acrilog.lib.baselogger import BaseLogger, create_stream_handler
 from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
-
+import threading as th
 
 class LogRecordQueueListener(QueueListener):
     def __init__(self, queue, verbose=False):  # *handlers):
@@ -176,10 +176,10 @@ class MpLogger(BaseLogger):
 
         self.loggerq = mp.Queue()
 
-        self._manager = manager = mp.Manager()
-        self.abort = manager.Event()
-        started = manager.Event()
-        self.finished = manager.Event()
+        # self._manager = manager = mp.Manager()
+        self.abort = th.Event()
+        started = th.Event()
+        self.finished = th.Event()
 
         start_kwargs = {
             'name': self.name,
@@ -197,8 +197,10 @@ class MpLogger(BaseLogger):
             'kwargs': self.handler_kwargs,
             'verbose': self.verbose,
             }
-        self.logger_proc = mp.Process(target=start_mplogger,
-                                      kwargs=start_kwargs, daemon=True)
+        #self.logger_proc = mp.Process(target=start_mplogger,
+        #                              kwargs=start_kwargs, daemon=True)
+        self.logger_proc = th.Thread(target=start_mplogger,
+                                      kwargs=start_kwargs, daemon=False)
         self.logger_proc.start()
 
         started.wait()
