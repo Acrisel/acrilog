@@ -66,7 +66,7 @@ class SSHLoggerClientHandler(logging.Handler):
     SSHLoggerClientHandler create handler object that sends
     '''
 
-    def __init__(self, logger_info, ssh_host):
+    def __init__(self, logger_info, ssh_host, verbose=False):
         ''' Initiate logger client on remote connecting to host:port
 
         Args:
@@ -77,6 +77,7 @@ class SSHLoggerClientHandler(logging.Handler):
         super(SSHLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
         self.sshpipe = None
+        self.verbose = verbose
 
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
@@ -86,7 +87,7 @@ class SSHLoggerClientHandler(logging.Handler):
         kwargs.update(mp_logger_params)
         kwargs.update(handler_kwargs)
 
-        self.mp_logger = MpLogger(**kwargs)
+        self.mp_logger = MpLogger(**kwargs, verbose=self.verbose)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info, )

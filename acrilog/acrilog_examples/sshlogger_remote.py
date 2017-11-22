@@ -26,7 +26,7 @@ def main(port):
 
         }
 
-    handler = SSHLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris') #, logger=module_logger)
+    handler = SSHLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=True) #, logger=module_logger)
     logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)

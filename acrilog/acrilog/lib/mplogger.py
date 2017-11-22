@@ -207,11 +207,14 @@ class MpLogger(BaseLogger):
 
     def stop(self,):
         if self.abort:
-            print('stop: setting abort.')
+            if self.verbose:
+                print('stop: setting abort.')
             self.abort.set()
-            print('stop: waiting to finish.')
+            if self.verbose:
+                print('stop: waiting to finish.')
             self.finished.wait()
-            print('stop: joining process.')
+            if self.verbose:
+                print('stop: joining process.')
             self.logger_proc.join()
 
 
