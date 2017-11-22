@@ -21,7 +21,6 @@
 #    along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import multiprocessing as mp
 import os
 import sshutil
 import logging
@@ -47,8 +46,9 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
         try:
             log_info = yaml.load(log_info)
         except Exception as e:
-            raise Exception("Failed to YAML.load('{}')".format(log_info)) from e
-        
+            msg = "Failed to YAML.load('{}')".format(log_info)
+            raise Exception(msg) from e
+
         # TODO: why do we need to do such assignment if logger has proper handler
         module_logger = self.module_logger
         module_logger.debug('Accepted logging info:{}.'.format(log_info))
@@ -63,10 +63,10 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
 class SSHLoggerClientHandler(logging.Handler):
     ''' Logging handler to send logging records to remote logging server via SSHPipe
 
-    NwLoggerClientHandler create handler object that sends 
+    SSHLoggerClientHandler create handler object that sends
     '''
 
-    def __init__(self, logger_info, ssh_host,): # logger=None, logdir='/tmp'):
+    def __init__(self, logger_info, ssh_host):
         ''' Initiate logger client on remote connecting to host:port
 
         Args:
@@ -85,16 +85,16 @@ class SSHLoggerClientHandler(logging.Handler):
         kwargs = {}
         kwargs.update(mp_logger_params)
         kwargs.update(handler_kwargs)
-        
+
         self.mp_logger = MpLogger(**kwargs)
         self.mp_logger.start()
         mp_logger_info = self.mp_logger.logger_info()
-        module_logger = MpLogger.get_logger(mp_logger_info, ) # name=mp_logger_params['name'])
+        module_logger = MpLogger.get_logger(mp_logger_info, )
 
         self.addFilter(LoggerAddHostFilter())
 
-        # there is no need to pass loggerq via ssh.  
-        # alos, it wont work anyhow.
+        # there is no need to pass loggerq via ssh.
+        # also, it wont work anyhow.
         # but it does need port
         del mp_logger_info['loggerq']
         mp_logger_info['port'] = logger_info['port']
@@ -103,7 +103,6 @@ class SSHLoggerClientHandler(logging.Handler):
         command = ["{}".format(os.path.basename(__file__)), ]
         # server_host = logger_info['server_host']
 
-        # logger_name = "{}_nwlogger_handler_{}_{}".format(logger_info['name'], logger_info['server_host'], os.getpid())
         logger_name = logger_info['name']
         kwargs = {"--handler-id": logger_name,
                   # "--host": server_host, #logger_info['host'],
@@ -149,8 +148,6 @@ class SSHLoggerClientHandler(logging.Handler):
         if self.mp_logger:
             self.mp_logger.stop()
             self.mp_logger = None
-        #if self.sshpipe:
         if self.sshpipe.is_alive():
             self.sshpipe.close()
         super(SSHLoggerClientHandler, self).close()
-
