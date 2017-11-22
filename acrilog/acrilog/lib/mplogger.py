@@ -28,8 +28,9 @@ from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
 
 
 class LogRecordQueueListener(QueueListener):
-    def __init__(self, queue,):  # *handlers):
+    def __init__(self, queue, verbose=False):  # *handlers):
         super(LogRecordQueueListener, self).__init__(queue,)  # *handlers)
+        self.verbose = verbose
 
     def handle(self, record):
         name = record.name
@@ -37,15 +38,22 @@ class LogRecordQueueListener(QueueListener):
         record = self.prepare(record)
         logger.handle(record)
 
-    def start_server_until_stopped(self, abort):
+    def start_server_wait_event(self, abort):
+        if self.verbose:
+            print('start_server_wait_event: starting.')
         self.start()
+        if self.verbose:
+            print('start_server_wait_event: waiting for abort.')
         abort.wait()
+        if self.verbose:
+            print('start_server_wait_event: stopping.')
         self.stop()
 
 
 def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
                    formatter=None, level_formats=None, datefmt=None,
                    console=False, started=None, abort=None, finished=None,
+                   verbose=False,
                    args=(), kwargs={},):
     logger = logging.getLogger()
     logger.setLevel(logging_level)
@@ -63,9 +71,13 @@ def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
     for handler in handlers:
         logger.addHandler(handler)
 
-    queue_listener = LogRecordQueueListener(loggerq,)
+    queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
+    if verbose:
+        print('start_mplogger: setting started.')
     started.set()
-    queue_listener.start_server_until_stopped(abort)
+    queue_listener.start_server_wait_event(abort)
+    if verbose:
+        print('start_mplogger: setting finished.')
     finished.set()
 
 
@@ -75,7 +87,7 @@ class MpLogger(BaseLogger):
     '''
 
     def __init__(self, name=None, logging_level=logging.INFO, handlers=[],
-                 *args, **kwargs):
+                 verbose=False, *args, **kwargs):
         '''Initiates MpLogger service
 
         Args:
@@ -116,6 +128,7 @@ class MpLogger(BaseLogger):
         self.abort = None
         self.logger_initialized = False
         self.handlers = handlers
+        self.verbose = verbose
 
     def logger_info(self):
         info = super(MpLogger, self).logger_info()
@@ -181,6 +194,7 @@ class MpLogger(BaseLogger):
             'finished': self.finished,
             'args': self.handler_args,
             'kwargs': self.handler_kwargs,
+            'verbose': self.verbose,
             }
         self.logger_proc = mp.Process(target=start_mplogger,
                                       kwargs=start_kwargs, daemon=True)
@@ -193,8 +207,11 @@ class MpLogger(BaseLogger):
 
     def stop(self,):
         if self.abort:
+            print('stop: setting abort.')
             self.abort.set()
+            print('stop: waiting to finish.')
             self.finished.wait()
+            print('stop: joining process.')
             self.logger_proc.join()
 
 
