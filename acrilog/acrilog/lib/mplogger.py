@@ -176,9 +176,10 @@ class MpLogger(BaseLogger):
 
         self.loggerq = mp.Queue()
 
-        self.abort = mp.Event()
-        started = mp.Event()
-        self.finished = mp.Event()
+        self._manager = manager = mp.Manager()
+        self.abort = manager.Event()
+        started = manager.Event()
+        self.finished = manager.Event()
 
         start_kwargs = {
             'name': self.name,
@@ -208,13 +209,13 @@ class MpLogger(BaseLogger):
     def stop(self,):
         if self.abort:
             if self.verbose:
-                print('stop: setting abort.')
+                print('mplogger stop: setting abort.')
             self.abort.set()
             if self.verbose:
-                print('stop: waiting to finish.')
+                print('mplogger stop: waiting to finish.')
             self.finished.wait()
             if self.verbose:
-                print('stop: joining process.')
+                print('mplogger stop: joining process.')
             self.logger_proc.join()
 
 
