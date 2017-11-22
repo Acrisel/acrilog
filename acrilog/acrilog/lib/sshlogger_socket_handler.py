@@ -58,11 +58,13 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
     def handle(self, received):
         # it may be "TERM" message or alike
         if isinstance(received, logging.LogRecord):
+            module_logger.debug('Handling record:\n    {}.'
+                                .format(repr(received)))
             self.sshlogger.handle(received)
 
 
 class SSHLoggerClientHandler(logging.Handler):
-    ''' Logging handler to send logging records to remote logging server via SSHPipe
+    ''' SSHPipe Logging handler to send logging records to remote logging server
 
     SSHLoggerClientHandler create handler object that sends
     '''
