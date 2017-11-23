@@ -84,8 +84,9 @@ class SSHLoggerClientHandler(logging.Handler):
 
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
-        name = mp_logger_params['name']
-        name = mp_logger_params['name'] = name + '_sshlogger_client_handler'
+        # name = mp_logger_params['name']
+        # name = mp_logger_params['name'] = name + '_sshlogger_client_handler'
+        handler_id = mp_logger_params['name'] + '_sshlogger_client_handler'
         handler_kwargs = mp_logger_params.get('handler_kwargs', dict())
         kwargs = {}
         kwargs.update(mp_logger_params)
@@ -108,8 +109,8 @@ class SSHLoggerClientHandler(logging.Handler):
         command = ["{}".format(os.path.basename(__file__)), ]
         # server_host = logger_info['server_host']
 
-        logger_name = logger_info['name']
-        kwargs = {"--handler-id": name, #logger_name,
+        # logger_name = logger_info['name']
+        kwargs = {"--handler-id": handler_id, #logger_name,
                   # "--host": server_host, #logger_info['host'],
                   # "--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
