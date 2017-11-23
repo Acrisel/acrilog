@@ -52,7 +52,7 @@ def cmdargs():
 
     parser = argparse.ArgumentParser(
         description="%s runs SSH logging client example" % progname)
-    parser.add_argument('-p', '--port', type=int, default=54973,
+    parser.add_argument('-p', '--port', type=int, required=True,
                         help="""Port for logging server.""")
     args = parser.parse_args()
     print(args)

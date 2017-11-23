@@ -156,8 +156,8 @@ class SSHLoggerClientHandler(logging.Handler):
         try:
             self.sshpipe.send(record)
         except Exception as e:
-            msg = "Failed SSHPipe send: {}."
-            raise SSHLoggerHandlerError(msg.format(record.msg)) from e
+            raise SSHLoggerHandlerError(
+                "Failed SSHPipe send: {}.".format(record.msg)) from e
 
     def __del__(self):
         self.close()
