@@ -79,8 +79,7 @@ class BaseLogger(object):
             }
 
     def __init__(self, name=None, logging_level=logging.INFO, level_formats={}, datefmt=None, console=False, handlers=[], *args, **kwargs):
-        '''Initiates MpLogger service
-
+        '''
         Args:
             name: base name to use for file logs.
             logdir: folder to which log files will be written; if not provided, log files will not be created

@@ -24,10 +24,15 @@
 import multiprocessing as mp
 import os
 import logging
-from acrilog.lib.sshlogger_socket_handler import LoggingSSHPipeHandler
+from acrilog.lib.sshlogger_pipe_handler import SSHLoggerPipeHandler
 
 
 module_logger = logging.getLogger(__name__)
+
+
+def main(*args, **kwargs):
+    client = SSHLoggerPipeHandler(**kwargs)
+    client.service_loop()
 
 
 def cmdargs():
@@ -36,7 +41,8 @@ def cmdargs():
     filename = os.path.basename(__file__)
     progname = filename.rpartition('.')[0]
 
-    parser = argparse.ArgumentParser(description="%s runs SSH logging Port Agent" % progname)
+    parser = argparse.ArgumentParser(
+        description="%s runs SSH logging Port Agent" % progname)
     parser.add_argument('--handler-id', type=str, dest="handler_id",
                         help="""Logger name.""")
     parser.add_argument('--log-info', type=str, dest='log_info',
@@ -51,6 +57,4 @@ if __name__ == '__main__':
     mp.set_start_method('spawn')
 
     args = cmdargs()
-    # start_nwlogger_client(**vars(args))
-    client = LoggingSSHPipeHandler(**vars(args))
-    client.service_loop()
+    main(**vars(args))

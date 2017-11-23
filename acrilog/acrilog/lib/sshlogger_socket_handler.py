@@ -92,9 +92,9 @@ class SSHLoggerClientHandler(logging.Handler):
         kwargs.update(mp_logger_params)
         kwargs.update(handler_kwargs)
 
-        self.mp_logger = MpLogger(**kwargs, verbose=self.verbose)
-        self.mp_logger.start()
-        mp_logger_info = self.mp_logger.logger_info()
+        self._mp_logger = MpLogger(**kwargs, verbose=self.verbose)
+        self._mp_logger.start()
+        mp_logger_info = self._mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info, )
 
         self.addFilter(LoggerAddHostFilter())
@@ -106,11 +106,12 @@ class SSHLoggerClientHandler(logging.Handler):
         mp_logger_info['port'] = logger_info['port']
         # mp_logger_info['console'] = False
 
+        # this program has a twin in bin as executable
         command = ["{}".format(os.path.basename(__file__)), ]
         # server_host = logger_info['server_host']
 
         # logger_name = logger_info['name']
-        kwargs = {"--handler-id": handler_id, #logger_name,
+        kwargs = {"--handler-id": handler_id,  # logger_name,
                   # "--host": server_host, #logger_info['host'],
                   # "--port": logger_info['port'],
                   '--log-info': '"{}"'.format(yaml.dump(mp_logger_info)),
@@ -133,18 +134,21 @@ class SSHLoggerClientHandler(logging.Handler):
             self.sshpipe.start()
         except Exception as e:
             module_logger.exception(e)
-            module_logger.critical('Agent failed to start: {}'.format(ssh_host))
+            module_logger.critical(
+                'Agent failed to start: {}'.format(ssh_host))
             response = self.sshpipe.response()
-            msg = "Failed to start SSHPipe to: {}; response: {}."
-            raise SSHLoggerHandlerError(msg.format(ssh_host, response))
+            raise SSHLoggerHandlerError(
+                ("Failed to start SSHPipe to: {}; "
+                 "response: {}.").format(ssh_host, response))
 
         if not self.sshpipe.is_alive():
-            msg = 'Agent process terminated unexpectedly: {}.'
-            module_logger.critical(msg.format(ssh_host))
+            module_logger.critical(
+                'Agent process terminated unexpectedly: {}.'.format(ssh_host))
             self.sshpipe.join()
             response = self.sshpipe.response()
-            msg = "Failed to start SSHPipe to: {}; response: {}."
-            raise SSHLoggerHandlerError(msg.format(ssh_host, response)) 
+            raise SSHLoggerHandlerError(
+                ("Failed to start SSHPipe to: {}; "
+                 "response: {}.").format(ssh_host, response))
 
         module_logger.debug("Remote logger SSHPipe started.")
 
@@ -159,11 +163,11 @@ class SSHLoggerClientHandler(logging.Handler):
         self.close()
 
     def close(self):
-        if self.mp_logger:
+        if self._mp_logger:
             if self.verbose:
                 print("SSHLoggerClientHandler: stopping mplogger.")
-            self.mp_logger.stop()
-            self.mp_logger = None
+            self._mp_logger.stop()
+            self._mp_logger = None
         if self.sshpipe.is_alive():
             if self.verbose:
                 print("SSHLoggerClientHandler: closing sshpipe.")

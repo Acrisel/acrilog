@@ -28,29 +28,6 @@ from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
 # import threading as th
 
 
-class LogRecordQueueListener(QueueListener):
-    def __init__(self, queue, verbose=False):  # *handlers):
-        super(LogRecordQueueListener, self).__init__(queue,)  # *handlers)
-        self.verbose = verbose
-
-    def handle(self, record):
-        name = record.name
-        logger = logging.getLogger(name)
-        record = self.prepare(record)
-        print('LogRecordQueueListener record:', record)
-        logger.h(record)
-
-    def start_server_wait_event(self, abort):
-        if self.verbose:
-            print('start_server_wait_event: starting.')
-        self.start()
-        if self.verbose:
-            print('start_server_wait_event: waiting for abort.')
-        abort.wait()
-        if self.verbose:
-            print('start_server_wait_event: stopping.')
-        self.stop()
-
 class _QueueListener(QueueListener):
     def dequeue(self, block):
         ''' adding capture to EOF
@@ -61,22 +38,26 @@ class _QueueListener(QueueListener):
             item = None
         return item
 
-def start_mplogger(name=None, loggerq=None, handlers=[], logging_level=None,
-                   formatter=None, level_formats=None, datefmt=None,
-                   console=False, started=None, abort=None, finished=None,
-                   verbose=False,
-                   args=(), kwargs={},):
-    logger = logging.getLogger()
+
+# def _start(name=None, loggerq=None, handlers=[], logging_level=None,
+#            formatter=None, level_formats=None, datefmt=None,
+#            console=False, started=None, abort=None, finished=None,
+#            verbose=False,
+#            args=(), kwargs={},):
+def _start(name=None, loggerq=None, handlers=[], logging_level=None,
+           formatter=None, level_formats=None, datefmt=None,
+           console=False, verbose=False, args=(), kwargs={},):
+    logger = logging.getLogger(name)
     logger.setLevel(logging_level)
     logger.addFilter(LoggerAddHostFilter())
 
-    handlers += [HierarchicalTimedSizedRotatingHandler(*args,
-                                                       formatter=formatter,
-                                                       **kwargs)]
+    handlers += [
+        HierarchicalTimedSizedRotatingHandler(*args,
+                                              formatter=formatter, **kwargs)]
     if console:
-        console_handlers = create_stream_handler(logging_level=logging_level,
-                                                 level_formats=level_formats,
-                                                 datefmt=datefmt)
+        console_handlers = \
+            create_stream_handler(logging_level=logging_level,
+                                  level_formats=level_formats, datefmt=datefmt)
         handlers.extend(console_handlers)
 
     for handler in handlers:
@@ -192,7 +173,7 @@ class MpLogger(BaseLogger):
 
         if self.logger_initialized:
             return
-        
+
         self.logger_initialized = True
 
         self.loggerq = mp.Queue()
@@ -219,7 +200,7 @@ class MpLogger(BaseLogger):
             'verbose': self.verbose,
             }
 
-        self._queue_listener = start_mplogger(**start_kwargs)
+        self._queue_listener = _start(**start_kwargs)
         '''
         self.logger_proc = mp.Process(target=start_mplogger,
                                       kwargs=start_kwargs, daemon=True)
