@@ -26,7 +26,8 @@ def main(port):
 
         }
 
-    handler = SSHLoggerClientHandler(logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=True) #, logger=module_logger)
+    handler = SSHLoggerClientHandler(
+        logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=True)
     logger = logging.getLogger('example.e1')
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
@@ -39,7 +40,7 @@ def main(port):
     logger.warning('Jail zesty vixen who grabbed pay from quack.')
     logger.debug('Quick zephyrs blow, vexing daft Jim.')
     logger.error('The five boxing wizards jump quickly.')
-    
+
     print('done logging.')
 
 
@@ -49,7 +50,8 @@ def cmdargs():
     filename = os.path.basename(__file__)
     progname = filename.rpartition('.')[0]
 
-    parser = argparse.ArgumentParser(description="%s runs SSH logging client example" % progname)
+    parser = argparse.ArgumentParser(
+        description="%s runs SSH logging client example" % progname)
     parser.add_argument('-p', '--port', type=int, default=54973,
                         help="""Port for logging server.""")
     args = parser.parse_args()
