@@ -126,9 +126,10 @@ class SSHLoggerClientHandler(logging.Handler):
         logname = '{}.sshpipe'.format(logger_info['name'],)
 
         try:
+            # Important: cannot pass logger from here to SSHPipe
+            # If logger is passed, infinit recursion is created.
             self.sshpipe = sshutil.SSHPipe(ssh_host, command,
-                                           name=logname,
-                                           logger=module_logger)
+                                           name=logname,)
             msg = "Starting remote logger SSHPipe on host: {}, command: {}"
             module_logger.debug(msg.format(ssh_host, command))
             self.sshpipe.start()
@@ -156,6 +157,7 @@ class SSHLoggerClientHandler(logging.Handler):
         try:
             self.sshpipe.send(record)
         except Exception as e:
+            raise e
             raise SSHLoggerHandlerError(
                 "Failed SSHPipe send: {}.".format(record.msg)) from e
 
