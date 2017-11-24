@@ -86,7 +86,7 @@ class SSHLoggerClientHandler(logging.Handler):
         del mp_logger_params['port']
         # name = mp_logger_params['name']
         # name = mp_logger_params['name'] = name + '_sshlogger_client_handler'
-        handler_id = mp_logger_params['name'] + '_sshlogger_client_handler'
+        handler_id = mp_logger_params['name'] + '_sshlogger_socket_handler'
         handler_kwargs = mp_logger_params.get('handler_kwargs', dict())
         kwargs = {}
         kwargs.update(mp_logger_params)

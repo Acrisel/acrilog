@@ -4,7 +4,7 @@ Created on Sep 24, 2017
 
 @author: arnon
 '''
-from acrilog import SSHLogger, SSHLoggerClientHandler
+from acrilog import SSHLoggerClientHandler
 import multiprocessing as mp
 import logging
 import os
