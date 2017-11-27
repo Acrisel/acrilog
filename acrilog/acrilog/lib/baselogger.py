@@ -196,12 +196,12 @@ class BaseLogger(object):
         # will be inherited.
 
         this_host = get_hostname() #(full=True)
-
+        server_host = logger_info.get('server_host', 'localhost')
         # server may already started logger
         # if logger_info['server_host'] == server_host: return logger
 
         # add the handler only if processing locally and this host is not server host.
-        if logger_info['server_host'] != this_host:
+        if server_host == 'localhost' or server_host != this_host:
             level_formats = logger_info['level_formats']
             datefmt = logger_info['datefmt']
             cls.add_file_handlers(name=name,

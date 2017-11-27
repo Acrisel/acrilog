@@ -85,8 +85,9 @@ class SSHLoggerClientHandler(logging.Handler):
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
         name = mp_logger_params['name']
-        handler_id = mp_logger_params['name'] = name + '_sshlogger_client_handler'
-        #handler_id = mp_logger_params['name'] + '_sshlogger_socket_handler'
+        handler_id = name + '_sshlogger_client_handler'
+        mp_logger_params['name'] = handler_id
+        # handler_id = mp_logger_params['name'] + '_sshlogger_socket_handler'
         handler_kwargs = mp_logger_params.get('handler_kwargs', dict())
         kwargs = {}
         kwargs.update(mp_logger_params)
@@ -123,13 +124,13 @@ class SSHLoggerClientHandler(logging.Handler):
                         for name, value in kwargs.items()])
         command = ' '.join(command)
 
-        logname = '{}.sshpipe'.format(logger_info['name'],)
+        logname = logger_info['name']
 
         try:
             # Important: cannot pass logger from here to SSHPipe
-            # If logger is passed, infinit recursion is created.
+            # If logger is passed, infinite recursion is created.
             self.sshpipe = sshutil.SSHPipe(ssh_host, command,
-                                           name=logname,)
+                                           name=logname, logger=module_logger)
             msg = "Starting remote logger SSHPipe on host: {}, command: {}"
             module_logger.debug(msg.format(ssh_host, command))
             self.sshpipe.start()
