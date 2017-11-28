@@ -163,9 +163,13 @@ class SSHLoggerClientHandler(logging.Handler):
                 "Failed SSHPipe send: {}.".format(record.msg)) from e
 
     def __del__(self):
+        if self.verbose:
+            print("SSHLoggerClientHandler: __del__().")
         self.close()
 
     def close(self):
+        if self.verbose:
+            print("SSHLoggerClientHandler: closing handler.")
         if self._mp_logger:
             if self.verbose:
                 print("SSHLoggerClientHandler: stopping mplogger.")
