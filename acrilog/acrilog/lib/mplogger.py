@@ -61,6 +61,7 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
         handlers.extend(console_handlers)
 
     for handler in handlers:
+        print('_start:', 'adding handler', repr(handler))
         logger.addHandler(handler)
 
     queue_listener = _QueueListener(loggerq, *handlers)
