@@ -21,6 +21,7 @@
 ##############################################################################
 
 import logging
+import signal
 from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
 from acrilog.lib.baselogger import BaseLogger, create_stream_handler
@@ -73,6 +74,7 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
         logger.addHandler(handler)
 
     queue_listener = _QueueListener(started, loggerq, *handlers)
+    
     # queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
     if verbose:
         print('start_mplogger: starting listener.')
@@ -81,6 +83,15 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
     if verbose:
         print('start_mplogger: listener started.')
     # return queue_listener
+    
+    def exit_gracefully(signo, stack_frame, *args, **kwargs):
+        queue_listener.stop()
+        finished.set()
+    
+    # set exits
+    signal.signal(signal.SIGHUP, exit_gracefully)
+    signal.signal(signal.SIGINT, exit_gracefully)
+    signal.signal(signal.SIGTERM, exit_gracefully)
 
     abort.wait()
     '''

@@ -22,7 +22,7 @@ def main(port):
         'name': 'example.e1',
         'port': port,
         'logging_level': logging.DEBUG,
-        #'server_host': 'arnon-mbp',
+        # 'server_host': 'arnon-mbp',
         }
 
     # handler = SSHLoggerClientHandler(
