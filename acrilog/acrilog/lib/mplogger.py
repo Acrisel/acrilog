@@ -31,7 +31,6 @@ from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
 class _QueueListener(QueueListener):
     def __init__(self, started, *args, **kwargs):
         super(_QueueListener, self).__init__(*args, **kwargs)
-        #self.finished = finished
         started.set()
 
     def dequeue(self, block,):
@@ -47,11 +46,10 @@ class _QueueListener(QueueListener):
     #     super(_QueueListener, self).stop()
     #     self.finished.set()
 
-
-
 # def _start(name=None, loggerq=None, handlers=[], logging_level=None,
 #            formatter=None, level_formats=None, datefmt=None,
 #            console=False, verbose=False, args=(), kwargs={},):
+
 
 def _start(name=None, loggerq=None, handlers=[], logging_level=None,
            formatter=None, level_formats=None, datefmt=None,
