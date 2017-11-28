@@ -29,7 +29,12 @@ from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
 
 
 class _QueueListener(QueueListener):
-    def dequeue(self, block):
+    def __init__(self, started, *args, **kwargs):
+        super(_QueueListener, self).__init__(*args, **kwargs)
+        #self.finished = finished
+        started.set()
+
+    def dequeue(self, block,):
         ''' adding capture to EOF
         '''
         try:
@@ -38,15 +43,21 @@ class _QueueListener(QueueListener):
             item = None
         return item
 
+    # def stop(self):
+    #     super(_QueueListener, self).stop()
+    #     self.finished.set()
+
+
 
 # def _start(name=None, loggerq=None, handlers=[], logging_level=None,
 #            formatter=None, level_formats=None, datefmt=None,
-#            console=False, started=None, abort=None, finished=None,
-#            verbose=False,
-#            args=(), kwargs={},):
+#            console=False, verbose=False, args=(), kwargs={},):
+
 def _start(name=None, loggerq=None, handlers=[], logging_level=None,
            formatter=None, level_formats=None, datefmt=None,
-           console=False, verbose=False, args=(), kwargs={},):
+           console=False, started=None, abort=None, finished=None,
+           verbose=False,
+           args=(), kwargs={},):
     logger = logging.getLogger(name)
     logger.setLevel(logging_level)
     logger.addFilter(LoggerAddHostFilter())
@@ -61,26 +72,29 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
         handlers.extend(console_handlers)
 
     for handler in handlers:
-        print('_start:', 'adding handler', repr(handler))
         logger.addHandler(handler)
 
-    queue_listener = _QueueListener(loggerq, *handlers)
+    queue_listener = _QueueListener(started, loggerq, *handlers)
     # queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
     if verbose:
         print('start_mplogger: starting listener.')
     queue_listener.start()
+    # started.set()
     if verbose:
         print('start_mplogger: listener started.')
-    return queue_listener
+    # return queue_listener
+
+    abort.wait()
     '''
     if verbose:
         print('start_mplogger: setting started.')
-    started.set()
     queue_listener.start_server_wait_event(abort)
+    started.set()
+    '''
+    queue_listener.stop()
     if verbose:
         print('start_mplogger: setting finished.')
     finished.set()
-    '''
 
 
 class MpLogger(BaseLogger):
@@ -180,9 +194,9 @@ class MpLogger(BaseLogger):
         self.loggerq = mp.Queue()
 
         # self._manager = manager = mp.Manager()
-        # self.abort = mp.Event()
-        # started = mp.Event()
-        # self.finished = mp.Event()
+        self.abort = mp.Event()
+        started = mp.Event()
+        self.finished = mp.Event()
 
         start_kwargs = {
             'name': self.name,
@@ -193,48 +207,49 @@ class MpLogger(BaseLogger):
             'level_formats': self.level_formats,
             'datefmt': self.datefmt,
             'console': self.console,
-            # 'started': started,
-            # 'abort': self.abort,
-            # 'finished': self.finished,
+            'started': started,
+            'abort': self.abort,
+            'finished': self.finished,
             'args': self.handler_args,
             'kwargs': self.handler_kwargs,
             'verbose': self.verbose,
             }
 
-        self._queue_listener = _start(**start_kwargs)
-        '''
-        self.logger_proc = mp.Process(target=start_mplogger,
+        #self._queue_listener = _start(**start_kwargs)
+
+        self._queue_listener = mp.Process(target=_start,
                                       kwargs=start_kwargs, daemon=True)
-        # self.logger_proc = th.Thread(target=start_mplogger,
+        # self._queue_listener = th.Thread(target=start_mplogger,
         #                               kwargs=start_kwargs, daemon=False)
-        self.logger_proc.start()
+        self._queue_listener.start()
 
         started.wait()
-        '''
+
         logger_info = self.logger_info()
         logger = MpLogger.get_logger(logger_info=logger_info, name=name)
         return logger
 
     def stop(self,):
         if self._queue_listener:
+            '''
             if self.verbose:
                 print('mplogger stop: stopping queue listener.')
             self._queue_listener.stop()
             if self.verbose:
                 print('mplogger stop: queue listener stopped.')
             self.__queue_listener = None
-        '''
-        if self.abort:
-            if self.verbose:
-                print('mplogger stop: setting abort.')
-            self.abort.set()
-            if self.verbose:
-                print('mplogger stop: waiting to finish.')
-            self.finished.wait()
-            if self.verbose:
-                print('mplogger stop: joining process.')
-            self.logger_proc.join()
-        '''
+            '''
+            if self.abort:
+                if self.verbose:
+                    print('mplogger stop: setting abort.')
+                self.abort.set()
+                # self._queue_listener.stop()
+                if self.verbose:
+                    print('mplogger stop: waiting to finish.')
+                self.finished.wait()
+                if self.verbose:
+                    print('mplogger stop: joining process.')
+                self._queue_listener.join()
 
 
 if __name__ == '__main__':
