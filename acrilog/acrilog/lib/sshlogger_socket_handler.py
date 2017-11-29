@@ -81,6 +81,7 @@ class SSHLoggerClientHandler(logging.Handler):
         self.logger_info = logger_info
         self.sshpipe = None
         self.verbose = verbose
+        print('SSHLoggerClientHandler verbose:', self.verbose)
 
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
