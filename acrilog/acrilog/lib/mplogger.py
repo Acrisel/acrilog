@@ -74,7 +74,7 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
         logger.addHandler(handler)
 
     queue_listener = _QueueListener(started, loggerq, *handlers)
-    
+
     # queue_listener = LogRecordQueueListener(loggerq, verbose=verbose)
     if verbose:
         print('start_mplogger: starting listener.')
@@ -83,11 +83,11 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
     if verbose:
         print('start_mplogger: listener started.')
     # return queue_listener
-    
+
     def exit_gracefully(signo, stack_frame, *args, **kwargs):
         queue_listener.stop()
         finished.set()
-    
+
     # set exits
     signal.signal(signal.SIGHUP, exit_gracefully)
     signal.signal(signal.SIGINT, exit_gracefully)
@@ -226,8 +226,8 @@ class MpLogger(BaseLogger):
 
         #self._queue_listener = _start(**start_kwargs)
 
-        self._queue_listener = mp.Process(target=_start,
-                                      kwargs=start_kwargs, daemon=True)
+        self._queue_listener = \
+        mp.Process(target=_start, kwargs=start_kwargs, daemon=True)
         # self._queue_listener = th.Thread(target=start_mplogger,
         #                               kwargs=start_kwargs, daemon=False)
         self._queue_listener.start()
