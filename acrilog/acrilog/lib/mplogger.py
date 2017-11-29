@@ -239,10 +239,12 @@ class MpLogger(BaseLogger):
         return logger
 
     def stop(self,):
+        if self.verbose:
+            print('mplogger stopping.')
         if self._queue_listener:
-            '''
             if self.verbose:
                 print('mplogger stop: stopping queue listener.')
+            '''
             self._queue_listener.stop()
             if self.verbose:
                 print('mplogger stop: queue listener stopped.')
