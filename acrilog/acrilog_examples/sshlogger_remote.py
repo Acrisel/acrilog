@@ -41,7 +41,7 @@ def main(port):
     logger.error('The five boxing wizards jump quickly.')
 
     print('done logging.')
-    
+
     # must call logging shutdown for handler to close.
     logging.shutdown()
 
