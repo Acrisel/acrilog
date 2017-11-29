@@ -25,11 +25,9 @@ def main(port):
         # 'server_host': 'arnon-mbp',
         }
 
-    # handler = SSHLoggerClientHandler(
-    #     logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=True)
-    handler = SSHLoggerClientHandler(
-        logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=True)
     logger = logging.getLogger('example.e1')
+    handler = SSHLoggerClientHandler(
+        logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=False)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
 
@@ -43,6 +41,9 @@ def main(port):
     logger.error('The five boxing wizards jump quickly.')
 
     print('done logging.')
+    
+    # must call logging shutdown for handler to close.
+    logging.shutdown()
 
 
 def cmdargs():

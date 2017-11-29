@@ -153,10 +153,12 @@ class SSHLoggerClientHandler(logging.Handler):
                  "response: {}.").format(ssh_host, response))
 
         if self.verbose:
-            print("Remote logger SSHPipe started.")
-        module_logger.debug("Remote logger SSHPipe started.", self.sshpipe.is_alive())
+            print("SSHLoggerClientHandler: Remote logger SSHPipe started.", self.sshpipe.is_alive())
+        module_logger.debug("Remote logger SSHPipe started.")
 
     def emit(self, record):
+        if self.verbose:
+            print("SSHLoggerClientHandler: emitting record:", repr(record))
         try:
             self.sshpipe.send(record)
         except Exception as e:
@@ -165,9 +167,8 @@ class SSHLoggerClientHandler(logging.Handler):
                 "Failed SSHPipe send: {}.".format(record.msg)) from e
 
     def __del__(self):
-        if self.verbose:
-            print("SSHLoggerClientHandler: __del__().")
-        self.close()
+        if self._mp_logger:
+            self.close()
 
     def close(self):
         if self.verbose:
@@ -183,4 +184,4 @@ class SSHLoggerClientHandler(logging.Handler):
             self.sshpipe.close()
         if self.verbose:
             print("SSHLoggerClientHandler: closing hanlers.")
-        super(SSHLoggerClientHandler, self).close()
+        #super(SSHLoggerClientHandler, self).close()
