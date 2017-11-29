@@ -43,7 +43,7 @@ def main(port):
     print('done logging.')
     
     # must call logging shutdown for handler to close.
-    logging.shutdown()
+    # logging.shutdown()
 
 
 def cmdargs():
