@@ -81,7 +81,6 @@ class SSHLoggerClientHandler(logging.Handler):
         self.logger_info = logger_info
         self.sshpipe = None
         self.verbose = verbose
-        print('SSHLoggerClientHandler verbose:', self.verbose)
 
         mp_logger_params = deepcopy(logger_info)
         del mp_logger_params['port']
@@ -153,6 +152,8 @@ class SSHLoggerClientHandler(logging.Handler):
                 ("Failed to start SSHPipe to: {}; "
                  "response: {}.").format(ssh_host, response))
 
+        if self.verbose:
+            print("Remote logger SSHPipe started.")
         module_logger.debug("Remote logger SSHPipe started.")
 
     def emit(self, record):
