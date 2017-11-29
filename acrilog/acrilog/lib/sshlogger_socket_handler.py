@@ -154,7 +154,7 @@ class SSHLoggerClientHandler(logging.Handler):
 
         if self.verbose:
             print("Remote logger SSHPipe started.")
-        module_logger.debug("Remote logger SSHPipe started.")
+        module_logger.debug("Remote logger SSHPipe started.", self.sshpipe.is_alive())
 
     def emit(self, record):
         try:
