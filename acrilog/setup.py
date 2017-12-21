@@ -4,9 +4,10 @@ import re
 import codecs
 
 from setuptools import setup
+import importlib.util
 from distutils.sysconfig import get_python_lib
 from acrilib import read_meta_or_file, read_authors, read_version
-from acrilib import is_overlay, find_packages
+from acrilib import find_packages, existing_package
 
 '''
 is the Python package in your project. It's the top-level folder containing the
@@ -26,11 +27,27 @@ To create package and upload:
   twine upload -s dist/acrilog-1.0.2.tar.gz
 
 '''
+
+def import_setup_utils():
+    # load setup utils
+    try:
+        setup_utils_spec = \
+            importlib.util.spec_from_file_location("setup.utils",
+                                                   "setup_utils.py")
+        setup_utils = importlib.util.module_from_spec(setup_utils_spec)
+        setup_utils_spec.loader.exec_module(setup_utils)
+    except Exception as err:
+        raise RuntimeError("Failed to find setup_utils.py."
+                           " Please copy or link.") from err
+    return setup_utils
+
+
+setup_utils = import_setup_utils()
 HERE = os.path.abspath(os.path.dirname(__file__))
 PACKAGE = "acrilog"
 NAME = PACKAGE
 METAPATH = os.path.join(HERE, PACKAGE, "__init__.py")
-
+metahost = setup_utils.metahost(PACKAGE)
 
 '''
 DESCRIPTION short description, one sentence, of your project.
@@ -52,9 +69,10 @@ URL is the URL for the project. This URL may be a project website, the Github
 repository, or whatever URL you want. Again, this information is optional.
 '''
 URL = 'https://github.com/Acrisel/acrilog'
-VERSION = read_version('version', metafile=METAPATH,
-                       file=os.path.dirname(__file__))
-existing_path = is_overlay(PACKAGE)
+#VERSION = read_version('version', metafile=METAPATH,
+#                       file=os.path.dirname(__file__))
+VERSION = setup_utils.read_version(metahost=metahost)
+existing_path = existing_package(PACKAGE)
 
 scripts = ['acrilog/nwlogger_socket_handler.py']
 
