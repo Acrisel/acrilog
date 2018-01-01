@@ -24,7 +24,7 @@
 import logging
 from acrilog import SSHLogger
 import yaml
-from sshutil import SSHPipeHandler
+from sshpipe import SSHPipeHandler
 
 
 module_logger = logging.getLogger(__name__)

@@ -5,9 +5,6 @@ import codecs
 
 from setuptools import setup
 import importlib.util
-from distutils.sysconfig import get_python_lib
-from acrilib import read_meta_or_file, read_authors, read_version
-from acrilib import find_packages, existing_package
 
 '''
 is the Python package in your project. It's the top-level folder containing the
@@ -61,7 +58,7 @@ name parts and ending with email.
 e.g.,
 first-name last-name nick-name email@somewhere.com
 '''
-AUTHOR, AUTHOR_EMAIL = read_authors('authors', metafile=METAPATH)
+AUTHORS, AUTHOR_EMAILS = setup_utils.read_authors(metahost=metahost)
 
 
 '''
@@ -69,22 +66,22 @@ URL is the URL for the project. This URL may be a project website, the Github
 repository, or whatever URL you want. Again, this information is optional.
 '''
 URL = 'https://github.com/Acrisel/acrilog'
-#VERSION = read_version('version', metafile=METAPATH,
+# VERSION = read_version('version', metafile=METAPATH,
 #                       file=os.path.dirname(__file__))
 VERSION = setup_utils.read_version(metahost=metahost)
-existing_path = existing_package(PACKAGE)
+existing_path = setup_utils.existing_package(PACKAGE)
 
 scripts = ['acrilog/nwlogger_socket_handler.py']
 
 # Find all sub packages
-packages = find_packages(os.path.join(HERE, PACKAGE))
+packages = setup_utils.find_packages(os.path.join(HERE, PACKAGE))
 
 setup_info = {
     'name': NAME,
     'version': VERSION,
     'url': URL,
-    'author': AUTHOR,
-    'author_email': AUTHOR_EMAIL,
+    'author': AUTHORS,
+    'author_email': AUTHOR_EMAILS,
     'description': DESCRIPTION,
     'long_description': open("README.rst", "r").read(),
     'license': 'MIT',
