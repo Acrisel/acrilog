@@ -56,9 +56,12 @@ if __name__ == '__main__':
     mp.freeze_support()
     mp.set_start_method('spawn')
 
+    # logdir = '/var/acrisel/log/acrilog'
+    logdir = os.path.expanduser('~/log/acrilog')
+
     mplogger = MpLogger(
         name='acrilog',
-        logdir='/var/acrisel/log/acrilog',
+        logdir=logdir,
         logging_level=logging.DEBUG,
         level_formats=level_formats,
         encoding='utf8',

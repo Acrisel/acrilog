@@ -23,8 +23,8 @@ def main(port=None):
                           logdir='/tmp')
     logger = sshlogger.start()
 
-    logger.info("Logger host, port: {}, {}".format(sshlogger.host,
-                                                   sshlogger.port))
+    logger.info("Logger host, port: {}, {}"
+                .format(sshlogger.host, sshlogger.port))
 
     while True:
         time.sleep(0.5)
