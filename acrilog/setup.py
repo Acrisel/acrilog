@@ -71,7 +71,7 @@ URL = 'https://github.com/Acrisel/acrilog'
 VERSION = setup_utils.read_version(metahost=metahost)
 existing_path = setup_utils.existing_package(PACKAGE)
 
-scripts = ['acrilog/nwlogger_socket_handler.py']
+scripts = ['acrilog/bin/sshlogger_socket_handler.py']
 
 # Find all sub packages
 packages = setup_utils.find_packages(os.path.join(HERE, PACKAGE))
