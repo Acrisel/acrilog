@@ -71,8 +71,8 @@ class BaseLogger(object):
 
     logger_info_defaults = {
         'level_formats': {
-                logging.DEBUG: "[ %(asctime)-15s ][ %(host)s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
-                'default': "[ %(asctime)-15s ][ %(host)s ][ %(processName)-11s ][ %(levelname)-7s ][ %(message)s ]",
+                logging.DEBUG: "[ %(asctime)-15s ][ %(levelname)-7s ][ %(host)s ][ %(processName)-11s ][ %(message)s ][ %(module)s.%(funcName)s(%(lineno)d) ]",
+                'default': "[ %(asctime)-15s ][ %(levelname)-7s ][ %(host)s ][ %(processName)-11s ][ %(message)s ]",
                 },
          'datefmt': '%Y-%m-%d,%H:%M:%S.%f',
          'handler_kwargs': kwargs_defaults,

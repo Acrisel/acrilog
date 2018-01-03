@@ -25,7 +25,7 @@ import os
 import sshpipe
 import logging
 from copy import deepcopy
-from acrilib import LoggerAddHostFilter
+from acrilib import logging_record_add_host  # LoggerAddHostFilter
 from acrilog import MpLogger, SSHLogger
 import yaml
 from sshpipe import SSHPipeHandler
@@ -98,7 +98,8 @@ class SSHLoggerClientHandler(logging.Handler):
         mp_logger_info = self._mp_logger.logger_info()
         module_logger = MpLogger.get_logger(mp_logger_info, )
 
-        self.addFilter(LoggerAddHostFilter())
+        logging_record_add_host()
+        # self.addFilter(LoggerAddHostFilter())
 
         # there is no need to pass loggerq via ssh.
         # also, it wont work anyhow.

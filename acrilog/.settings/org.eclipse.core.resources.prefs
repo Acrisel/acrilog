@@ -6,3 +6,4 @@ encoding//acrilog/lib/sshlogger_socket_server.py=utf-8
 encoding//acrilog_examples/mplogger.py=utf-8
 encoding//build/lib/acrilog/mplogger.py=utf-8
 encoding//concepts/__init__.py=utf-8
+encoding//concepts/mplogger_queulistener.py=utf-8

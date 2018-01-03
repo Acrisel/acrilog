@@ -1,8 +1,4 @@
-import os
 import sys
-import re
-import codecs
-
 from setuptools import setup
 import importlib.util
 
@@ -25,6 +21,7 @@ To create package and upload:
 
 '''
 
+
 def import_setup_utils():
     # load setup utils
     try:
@@ -40,41 +37,17 @@ def import_setup_utils():
 
 
 setup_utils = import_setup_utils()
-HERE = os.path.abspath(os.path.dirname(__file__))
 PACKAGE = "acrilog"
 NAME = PACKAGE
-METAPATH = os.path.join(HERE, PACKAGE, "__init__.py")
 metahost = setup_utils.metahost(PACKAGE)
-
-'''
-DESCRIPTION short description, one sentence, of your project.
-'''
 DESCRIPTION = '''acrilog is a Python library of providing multiprocessing idiom
 to us in multiprocessing environment'''
-
-'''
-AUTHORS.txt contains a line per author. Each line contains space separated
-name parts and ending with email.
-e.g.,
-first-name last-name nick-name email@somewhere.com
-'''
 AUTHORS, AUTHOR_EMAILS = setup_utils.read_authors(metahost=metahost)
-
-
-'''
-URL is the URL for the project. This URL may be a project website, the Github
-repository, or whatever URL you want. Again, this information is optional.
-'''
 URL = 'https://github.com/Acrisel/acrilog'
-# VERSION = read_version('version', metafile=METAPATH,
-#                       file=os.path.dirname(__file__))
 VERSION = setup_utils.read_version(metahost=metahost)
 existing_path = setup_utils.existing_package(PACKAGE)
-
+packages = setup_utils.packages(PACKAGE)
 scripts = ['acrilog/bin/sshlogger_socket_handler.py']
-
-# Find all sub packages
-packages = setup_utils.find_packages(os.path.join(HERE, PACKAGE))
 
 setup_info = {
     'name': NAME,
@@ -88,7 +61,7 @@ setup_info = {
     'keywords': 'library logger multiprocessing',
     'packages': packages,
     'scripts': scripts,
-    'install_requires': ['acrilib>=1.0.0', 
+    'install_requires': ['acrilib>=1.0.6', 
                          'sshpipe>=0.5.0'],
     'extras_require': {'dev': [], 'test': []},
     'classifiers': ['Development Status :: 5 - Production/Stable',
@@ -108,8 +81,8 @@ setup_info = {
                     'Frameworks',
                     'Topic :: Software Development :: Libraries :: Python'
                     'Modules']}
-setup(**setup_info)
 
+setup(**setup_info)
 
 if existing_path:
     sys.stderr.write("""
