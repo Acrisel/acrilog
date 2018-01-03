@@ -3,16 +3,6 @@ from setuptools import setup
 import importlib.util
 
 '''
-is the Python package in your project. It's the top-level folder containing the
-__init__.py module that should be in the same directory as your setup.py file
-/-
-  |- README.rst
-  |- CHANGES.txt
-  |- setup.py
-  |- dogs
-     |- __init__.py
-     |- catcher.py
-
 To create package and upload:
 
   python setup.py register
@@ -39,15 +29,22 @@ def import_setup_utils():
 setup_utils = import_setup_utils()
 PACKAGE = "acrilog"
 NAME = PACKAGE
+DESCRIPTION = ('acrilog is a Python library of providing multiprocessing idiom'
+               'to us in multiprocessing environment')
 metahost = setup_utils.metahost(PACKAGE)
-DESCRIPTION = '''acrilog is a Python library of providing multiprocessing idiom
-to us in multiprocessing environment'''
 AUTHORS, AUTHOR_EMAILS = setup_utils.read_authors(metahost=metahost)
 URL = 'https://github.com/Acrisel/acrilog'
 VERSION = setup_utils.read_version(metahost=metahost)
-existing_path = setup_utils.existing_package(PACKAGE)
-packages = setup_utils.packages(PACKAGE)
+
+# Find previous installation and warn. See #18115.
+existing_path = None
+if "install" in sys.argv:
+    existing_path = setup_utils.existing_package(PACKAGE)
+
 scripts = ['acrilog/bin/sshlogger_socket_handler.py']
+
+# Find all sub packages
+packages = setup_utils.packages(PACKAGE)
 
 setup_info = {
     'name': NAME,
@@ -56,31 +53,32 @@ setup_info = {
     'author': AUTHORS,
     'author_email': AUTHOR_EMAILS,
     'description': DESCRIPTION,
-    'long_description': open("README.rst", "r").read(),
+    # 'description_content_type': 'text/x-rst; charset=UTF-8',
+    'long_description': setup_utils.read("README.rst"),
     'license': 'MIT',
     'keywords': 'library logger multiprocessing',
     'packages': packages,
     'scripts': scripts,
-    'install_requires': ['acrilib>=1.0.6', 
+    'install_requires': ['acrilib>=1.0.6',
                          'sshpipe>=0.5.0'],
     'extras_require': {'dev': [], 'test': []},
-    'classifiers': ['Development Status :: 5 - Production/Stable',
-                    'Environment :: Other Environment',
-                    # 'Framework :: Project Settings and Operation',
-                    'Intended Audience :: Developers',
-                    'License :: OSI Approved :: MIT License',
-                    'Operating System :: OS Independent',
-                    'Programming Language :: Python',
-                    'Programming Language :: Python :: 3',
-                    'Programming Language :: Python :: 3.2',
-                    'Programming Language :: Python :: 3.3',
-                    'Programming Language :: Python :: 3.4',
-                    'Programming Language :: Python :: 3.5',
-                    'Programming Language :: Python :: 3.6',
-                    'Topic :: Software Development :: Libraries :: Application'
-                    'Frameworks',
-                    'Topic :: Software Development :: Libraries :: Python'
-                    'Modules']}
+    'classifiers': [
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Other Environment',
+        # 'Framework :: Project Settings and Operation',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Software Development :: Libraries :: Application '
+        'Frameworks',
+        'Topic :: Software Development :: Libraries :: Python '
+        'Modules']}
 
 setup(**setup_info)
 
@@ -103,4 +101,4 @@ should manually remove the
 directory and re-install %(name)s.
 
 """ % {"existing_path": existing_path,
-       "name": NAME,})
+       "name": NAME})

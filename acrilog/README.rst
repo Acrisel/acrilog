@@ -1,6 +1,6 @@
-========
-acrislog
-========
+=======
+acrilog
+=======
 
 ----------------------
 Multiprocessing logger
