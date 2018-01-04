@@ -41,10 +41,12 @@ existing_path = None
 if "install" in sys.argv:
     existing_path = setup_utils.existing_package(PACKAGE)
 
-scripts = ['acrilog/bin/sshlogger_socket_handler.py']
+scripts = setup_utils.scripts(PACKAGE)
 
 # Find all sub packages
 packages = setup_utils.packages(PACKAGE)
+
+required = setup_utils.read_required(metahost=metahost)
 
 setup_info = {
     'name': NAME,
@@ -59,8 +61,7 @@ setup_info = {
     'keywords': 'library logger multiprocessing',
     'packages': packages,
     'scripts': scripts,
-    'install_requires': ['acrilib>=1.0.6',
-                         'sshpipe>=0.5.0'],
+    'install_requires': required,
     'extras_require': {'dev': [], 'test': []},
     'classifiers': [
         'Development Status :: 5 - Production/Stable',
