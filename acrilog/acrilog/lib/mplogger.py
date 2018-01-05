@@ -25,7 +25,8 @@ import signal
 from logging.handlers import QueueListener, QueueHandler
 import multiprocessing as mp
 from acrilog.lib.baselogger import BaseLogger, create_stream_handler, get_file_handler
-from acrilib import LoggerAddHostFilter, HierarchicalTimedSizedRotatingHandler
+# from acrilib import LoggerAddHostFilter
+from acrilib import logging_record_add_host, HierarchicalTimedSizedRotatingHandler
 # import threading as th
 
 
@@ -153,7 +154,8 @@ def _start(name=None, loggerq=None, handlers=[], logging_level=None,
            args=(), kwargs={},):
     logger = logging.getLogger(name)
     logger.setLevel(logging_level)
-    logger.addFilter(LoggerAddHostFilter())
+    logging_record_add_host()
+    # logger.addFilter(LoggerAddHostFilter())
 
     handlers += [HierarchicalTimedSizedRotatingHandler(
         *args, formatter=formatter, **kwargs)]
@@ -259,7 +261,8 @@ class MpLogger(BaseLogger):
         if name is not None:
             logger_info['name'] = name
         logger = BaseLogger.get_logger(logger_info)
-        logger.addFilter(LoggerAddHostFilter())
+        # logger.addFilter(LoggerAddHostFilter())
+        logging_record_add_host()
         loggerq = logger_info['loggerq']
 
         # check logger has already proper handlers or not

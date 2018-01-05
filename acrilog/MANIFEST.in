@@ -1,5 +1,6 @@
 include README*
 include INSTALL*
+include REQUIRED*
 include LICENSE*
 include CHANGES*
 include AUTHORS*

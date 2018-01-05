@@ -28,7 +28,7 @@ import struct
 import multiprocessing as mp
 import threading as th
 from acrilog.lib.baselogger import BaseLogger, create_stream_handler
-from acrilib import LoggerAddHostFilter, get_free_port
+from acrilib import logging_record_add_host, get_free_port  # LoggerAddHostFilter
 from acrilib import HierarchicalTimedSizedRotatingHandler
 
 
@@ -171,7 +171,8 @@ def start_sshlogger(name=None, host=None, port=None, handlers=[],
 
     logger = logging.getLogger(name=name)
     logger.setLevel(logging_level)
-    logger.addFilter(LoggerAddHostFilter())
+    logging_record_add_host()
+    # logger.addFilter(LoggerAddHostFilter())
 
     if USE_QUEUE:
         logger_queue_receiver = LoggerQueueReceiver(
@@ -272,7 +273,8 @@ class SSHLogger(BaseLogger):
             socketHandler = logging.handlers.SocketHandler(host, port)
             # socket handler sends the event as an unformatted pickle
             logger.addHandler(socketHandler)
-            logger.addFilter(LoggerAddHostFilter())
+            logging_record_add_host()
+            # logger.addFilter(LoggerAddHostFilter())
         return logger
 
     def start(self, name=None):

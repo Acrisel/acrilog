@@ -1,6 +1,6 @@
-========
-acrislog
-========
+=======
+acrilog
+=======
 
 ----------------------
 Multiprocessing logger
@@ -170,32 +170,51 @@ kwargs
 ------
 
 **kwargs** are named arguments that will passed to FileHandler.  This include:
-    | file_mode='a', for RotatingFileHandler
-    | maxBytes=0, for RotatingFileHandler
-    | backupCount=0, for RotatingFileHandler and TimedRotatingFileHandler
-    | encoding='ascii', for RotatingFileHandler and TimedRotatingFileHandler
-    | delay=False, for TimedRotatingFileHandler
-    | when='h', for TimedRotatingFileHandler
-    | interval=1, TimedRotatingFileHandler
-    | utc=False, TimedRotatingFileHandler
-    | atTime=None, for TimedRotatingFileHandler
+
+    .. code-block::
+    
+        file_mode='a', for RotatingFileHandler
+        maxBytes=0, for RotatingFileHandler
+        backupCount=0, for RotatingFileHandler and TimedRotatingFileHandler
+        encoding='ascii', for RotatingFileHandler and TimedRotatingFileHandler
+        delay=False, for TimedRotatingFileHandler
+        when='h', for TimedRotatingFileHandler
+        interval=1, TimedRotatingFileHandler
+        utc=False, TimedRotatingFileHandler
+        atTime=None, for TimedRotatingFileHandler
     
      
 Change History
 ==============
 
-    0.9: added ability to pass logger_info to subprocess,
-         exposed encoding parameter,
-    1.0: replaced **force_global** with **consolidate** to genrerate consolidated log
-         add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
-         MpLogger.__init__() **name** argument will be used for consolidated log.
-    1.1: add **file_prefix** and **file_suffix** as MpLogger parameters.
-         fix bug when logdir is None.
-    2.0: added NwLogger starting a server logger with NwLoggerClientHandler for remote processes.
+v0.9
+----
     
-        
+    1. added ability to pass logger_info to subprocess, 
+    2. exposed encoding parameter
+    
+v1.0
+----
+
+    1. replaced **force_global** with **consolidate** to genrerate consolidated log
+    2. add **name** argument to MpLogger.start().  This will return logger with that name for the main process.
+    3. MpLogger.__init__() **name** argument will be used for consolidated log.
+    
+v1.1
+----
+
+    1. add **file_prefix** and **file_suffix** as MpLogger parameters.
+    2. fix bug when logdir is None.
+    
+v2.0
+----
+
+    1. added NwLogger starting a server logger with NwLoggerClientHandler for remote processes.
+    
+
 Next Steps
 ==========
 
     1. Cluster support using TCP/IP 
     #. Logging monitor and alert
+    
