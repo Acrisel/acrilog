@@ -27,13 +27,13 @@ import yaml
 from sshpipe import SSHPipeHandler
 
 
-module_logger = logging.getLogger(__name__)
+mlogger = logging.getLogger(__name__)
 
 
 class SSHLoggerPipeHandler(SSHPipeHandler):
 
     def __init__(self, log_info=None, *args, **kwargs):
-        global module_logger
+        global mlogger
         super(SSHLoggerPipeHandler, self).__init__(*args, **kwargs)
         try:
             log_info = yaml.load(log_info)
@@ -43,13 +43,13 @@ class SSHLoggerPipeHandler(SSHPipeHandler):
 
         # TODO: why do we need to do such assignment
         #       if logger has proper handler
-        module_logger = self.module_logger
-        module_logger.debug('Accepted logging info:\n    {}.'.format(log_info))
+        mlogger = self.mlogger
+        mlogger.debug('Accepted logging info:\n    {}.'.format(log_info))
         self.sshlogger = SSHLogger.get_logger(log_info)
 
     def handle(self, received):
         # it may be "TERM" message or alike
-        module_logger.debug('Handling record:\n    {}.'
+        mlogger.debug('Handling record:\n    {}.'
                             .format(repr(received)))
         if isinstance(received, logging.LogRecord):
             self.sshlogger.handle(received)
