@@ -224,8 +224,7 @@ class SSHLogger(BaseLogger):
         self.logger_initialized = False
         self.logging_level = logging_level
         self.handlers = handlers
-        self.args = args
-        # self.kwargs = kwargs
+        # self.args = args
 
         if port is None:
             try:
@@ -234,7 +233,7 @@ class SSHLogger(BaseLogger):
                 raise AcrilogError('Failed to get free port.') from e
             if port is None:
                 raise AcrilogError('Failed to get free port, got None.')
-        #self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
+        # self.port = logging.handlers.DEFAULT_TCP_LOGGING_PORT
         self.port = port
 
     def logger_info(self):
