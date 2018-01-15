@@ -31,7 +31,7 @@ import yaml
 from sshpipe import SSHPipeHandler
 
 
-module_logger = logging.getLogger(__name__)
+mlogger = logging.getLogger(__name__)
 
 
 class SSHLoggerHandlerError(Exception):
@@ -41,7 +41,7 @@ class SSHLoggerHandlerError(Exception):
 class LoggingSSHPipeHandler(SSHPipeHandler):
 
     def __init__(self, log_info=None, *args, **kwargs):
-        global module_logger
+        global mlogger
         super(LoggingSSHPipeHandler, self).__init__(*args, **kwargs)
         try:
             log_info = yaml.load(log_info)
@@ -51,13 +51,13 @@ class LoggingSSHPipeHandler(SSHPipeHandler):
 
         # TODO: why do we need to do such assignment
         #       if logger has proper handler
-        module_logger = self.module_logger
-        module_logger.debug('Accepted logging info:\n    {}.'.format(log_info))
+        mlogger = self.mlogger
+        mlogger.debug('Accepted logging info:\n    {}.'.format(log_info))
         self.sshlogger = SSHLogger.get_logger(log_info)
 
     def handle(self, received):
         # it may be "TERM" message or alike
-        module_logger.debug('Handling record:\n    {}.'
+        mlogger.debug('Handling record:\n    {}.'
                             .format(repr(received)))
         if isinstance(received, logging.LogRecord):
             self.sshlogger.handle(received)
@@ -76,7 +76,7 @@ class SSHLoggerClientHandler(logging.Handler):
             logger_info: result of SSHLogger.logger_info().
             ssh_host: SSH config Host to connect to.
         '''
-        global module_logger
+        global mlogger
         super(SSHLoggerClientHandler, self).__init__()
         self.logger_info = logger_info
         self.sshpipe = None
@@ -96,7 +96,7 @@ class SSHLoggerClientHandler(logging.Handler):
         self._mp_logger = MpLogger(**kwargs, verbose=self.verbose)
         self._mp_logger.start()
         mp_logger_info = self._mp_logger.logger_info()
-        module_logger = MpLogger.get_logger(mp_logger_info, )
+        mlogger = MpLogger.get_logger(mp_logger_info, )
 
         logging_record_add_host()
         # self.addFilter(LoggerAddHostFilter())
@@ -131,13 +131,13 @@ class SSHLoggerClientHandler(logging.Handler):
             # Important: cannot pass logger from here to SSHPipe
             # If logger is passed, infinite recursion is created.
             self.sshpipe = sshpipe.SSHPipe(ssh_host, command,
-                                           name=logname, logger=module_logger)
+                                           name=logname, logger=mlogger)
             msg = "Starting remote logger SSHPipe on host: {}, command: {}"
-            module_logger.debug(msg.format(ssh_host, command))
+            mlogger.debug(msg.format(ssh_host, command))
             self.sshpipe.start()
         except Exception as e:
-            module_logger.exception(e)
-            module_logger.critical(
+            mlogger.exception(e)
+            mlogger.critical(
                 'Agent failed to start: {}'.format(ssh_host))
             response = self.sshpipe.response()
             raise SSHLoggerHandlerError(
@@ -145,8 +145,7 @@ class SSHLoggerClientHandler(logging.Handler):
                  "response: {}.").format(ssh_host, response))
 
         if not self.sshpipe.is_alive():
-            module_logger.critical(
-                'Agent process terminated unexpectedly: {}.'.format(ssh_host))
+            mlogger.critical('Agent process terminated unexpectedly: {}.'.format(ssh_host))
             self.sshpipe.join()
             response = self.sshpipe.response()
             raise SSHLoggerHandlerError(
@@ -155,7 +154,7 @@ class SSHLoggerClientHandler(logging.Handler):
 
         if self.verbose:
             print("SSHLoggerClientHandler: Remote logger SSHPipe started.", self.sshpipe.is_alive())
-        module_logger.debug("Remote logger SSHPipe started.")
+        mlogger.debug("Remote logger SSHPipe started.")
 
     def emit(self, record):
         if self.verbose:
