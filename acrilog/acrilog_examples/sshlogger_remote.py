@@ -27,7 +27,7 @@ def main(port):
 
     logger = logging.getLogger('example.e1')
     handler = SSHLoggerClientHandler(
-        logger_info=logger_info, ssh_host='arnon-mbp-acris', verbose=False)
+        logger_info=logger_info, ssh_host='mbp-acris', verbose=False)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
 
