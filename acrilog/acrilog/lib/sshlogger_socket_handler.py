@@ -22,13 +22,12 @@
 #
 ##############################################################################
 import os
-import sshpipe
+import sshpipe as sp
 import logging
 from copy import deepcopy
 from acrilib import logging_record_add_host  # LoggerAddHostFilter
 from acrilog import MpLogger, SSHLogger
 import yaml
-from sshpipe import SSHPipeHandler
 
 
 mlogger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class SSHLoggerHandlerError(Exception):
     pass
 
 
-class LoggingSSHPipeHandler(SSHPipeHandler):
+class LoggingSSHPipeHandler(sp.SSHPipeHandler):
 
     def __init__(self, log_info=None, *args, **kwargs):
         global mlogger
@@ -123,15 +122,15 @@ class SSHLoggerClientHandler(logging.Handler):
                   }
         command.extend(["{} {}".format(name, value)
                         for name, value in kwargs.items()])
-        command = ' '.join(command)
+        # command = ' '.join(command)
 
         logname = logger_info['name']
 
         try:
             # Important: cannot pass logger from here to SSHPipe
             # If logger is passed, infinite recursion is created.
-            self.sshpipe = sshpipe.SSHPipe(ssh_host, command,
-                                           name=logname, logger=mlogger)
+            self.sshpipe = sp.SSHTunnel(ssh_host, command,
+                                        name=logname, logger=mlogger)
             msg = "Starting remote logger SSHPipe on host: {}, command: {}"
             mlogger.debug(msg.format(ssh_host, command))
             self.sshpipe.start()
