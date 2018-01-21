@@ -21,11 +21,9 @@
 #    along with this program.  If not, see http://www.gnu.org/licenses/.
 #
 ##############################################################################
-import multiprocessing as mp
 import os
 import logging
 from acrilog.lib.sshlogger_pipe_handler import SSHLoggerPipeHandler
-
 
 module_logger = logging.getLogger(__name__)
 
@@ -53,8 +51,8 @@ def cmdargs():
 
 
 if __name__ == '__main__':
-    mp.freeze_support()
-    mp.set_start_method('spawn')
+    # mp.freeze_support()
+    # mp.set_start_method('spawn')
 
     args = cmdargs()
     main(**vars(args))

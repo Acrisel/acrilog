@@ -50,6 +50,6 @@ class SSHLoggerPipeHandler(SSHPipeHandler):
     def handle(self, received):
         # it may be "TERM" message or alike
         mlogger.debug('Handling record:\n    {}.'
-                            .format(repr(received)))
+                      .format(repr(received)))
         if isinstance(received, logging.LogRecord):
             self.sshlogger.handle(received)
